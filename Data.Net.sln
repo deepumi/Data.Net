@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Net", "Data.Net\Data.Net.csproj", "{1726F69F-F42A-40CC-AF26-F36E526EE49B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{00E2AA2B-7B00-4A37-AAA6-633052C250CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.Net.MsSql.Test", "Data.Net.Test\Data.Net.MsSql.Test.csproj", "{99785F2A-B8E2-4EAA-9462-C075E3053556}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1726F69F-F42A-40CC-AF26-F36E526EE49B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1726F69F-F42A-40CC-AF26-F36E526EE49B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1726F69F-F42A-40CC-AF26-F36E526EE49B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1726F69F-F42A-40CC-AF26-F36E526EE49B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99785F2A-B8E2-4EAA-9462-C075E3053556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99785F2A-B8E2-4EAA-9462-C075E3053556}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99785F2A-B8E2-4EAA-9462-C075E3053556}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99785F2A-B8E2-4EAA-9462-C075E3053556}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{99785F2A-B8E2-4EAA-9462-C075E3053556} = {00E2AA2B-7B00-4A37-AAA6-633052C250CA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8F6CCC9A-B269-46B7-818D-83B668D8F261}
+	EndGlobalSection
+EndGlobal
