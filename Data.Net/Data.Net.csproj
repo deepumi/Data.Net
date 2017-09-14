@@ -6,7 +6,7 @@
     <RootNamespace>Data.Net</RootNamespace>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>A simple, light weight data access library for any ADO.Net providers like SQL server,Oracle &amp; MySQL.</Description>
-    <RepositoryUrl>https://github.com/deepumi/AspNetMVC5Authorization</RepositoryUrl>
+    <RepositoryUrl>https://github.com/deepumi/Data.Net</RepositoryUrl>
     <PackageTags>data access, database</PackageTags>
     <Authors>Deepu Madhusoodanan</Authors>
     <Company />
