@@ -1,5 +1,23 @@
 # Data.Net
-A simple, light weight data access library for any ADO.Net providers like SQL server,Oracle &amp; MySQL.
+A simple, lightweight data access library for any ADO.Net providers like SQL server, Oracle &amp; MySQL.
+
+## No Dependencies
+Since Data.Net is written in .NetStandard 2.0 no third party libraries are required. 
+
+## Supporting platforms
+Data.Net support multiple frameworks and platforms.
+
+*  Net Core 2.0 / ASP.NET Core 2.0
+*  Net Standard 2.0
+*  NetFramework 4.6.1
+*  NetFramework 4.6.2
+*  NetFramework 4.7.0
+
+## Nuget
+Install [Data.Net](https://www.nuget.org/packages/Data.Net/) via [Nuget](https://www.nuget.org/packages/Data.Net/)
+```csharp
+PM> Install-Package Data.Net
+```
 
 Execute a query and return a single value from the first row
 -----------------------------------------
@@ -28,7 +46,7 @@ using(var db = new Database(new OracleConnection("connectionString")))
 }
 
 ```
-Execute a stored procedure and get multiple output parameter with return value.
+Execute a stored procedure and get multiple output parameter and return value.
 -----------------------------------------
 ```csharp
  var parameters = new DataParameters
@@ -47,7 +65,7 @@ Execute a stored procedure and get multiple output parameter with return value.
   Assert.IsTrue(dataParameter.Value<int>("@ReturnVal") > 0);
 
 ```
-Execute a command with Db transaction.
+Execute a command with DB transaction.
 ----------------------------------
 ```csharp
 using (var db = new Database())
@@ -68,4 +86,36 @@ using (var db = new Database())
 }
 ```
 
+Execute multiple query using a single DB connection instance
+-------------------------------------
+```csharp
 
+using(var db = new Database())
+{
+  var reader1 = db.ExecuteReader("sql",CommandType.Text,parameters,CommandBehavior.Default);
+  var reader2 = db.ExecuteReader("sql",CommandType.Text,parameters); //default behaviour is close connection
+}
+
+```
+Create DB provider specific parameter object
+-----------------------------
+Data.Net support multiple overloads so that you can create DB specific parameter object like below.
+```csharp
+
+public void Add(IDbDataParameter parameter) {}  //For any Ado.Net specific provider
+public void Add(string name, object value) {}
+public void Add(string name, ParameterDirection direction = ParameterDirection.Output,DbType dbType = DbType.Int32, int size = 0) {}
+
+```
+Example usage
+
+```csharp
+var p = new DataParameter();
+
+p.Add(new OracleParameter("name","value"));
+p.Add("name","value");
+p.Add("name",ParameterDirection.Output,DbType.Int32,0);
+
+```
+
+Please check out more samples in the Unit test app.
