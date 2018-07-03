@@ -1,4 +1,4 @@
-﻿#if NET461 || NET462 || NET47
+﻿#if NET461 || NET462 || NET47 || NET471 || NET472
 
 using System;
 using System.Configuration;

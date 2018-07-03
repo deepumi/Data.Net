@@ -32,7 +32,7 @@ namespace Data.Net
             _dbDataProvider = DbDataProviderFactory.GetDbDataProvider(_connection.GetType().FullName);
         }
 
-#if NET461 || NET462 || NET47
+#if NET461 || NET462 || NET47 || NET471 || NET472
         
         /// <inheritdoc />
         /// <summary>
@@ -118,7 +118,7 @@ namespace Data.Net
             {
                 using (var reader = cmd.ExecuteReader(behavior))
                 {
-                    var row = new DataRowReader();
+                    var row = new DataRowReader(reader.FieldCount);
 
                     while (reader.Read())
                     {
@@ -152,7 +152,7 @@ namespace Data.Net
             {
                 using (var reader = cmd.ExecuteReader(behavior))
                 {
-                    var row = new DataRowReader();
+                    var row = new DataRowReader(reader.FieldCount);
                     if (reader.Read())
                     {
                         result = row.ReaderToType<T>(reader);

@@ -9,7 +9,13 @@ namespace Data.Net.MsSql.Test
     public class QueryTest : TestBase,IDisposable
     {
         private readonly Database _db =  new Database();
- 
+
+        [TestMethod]
+        public void Query_Single_String()
+        {
+            var q = _db.QuerySingle<string>("SELECT FirstName from Users_Test");
+            Assert.IsTrue(q != null);
+        }
 
         [TestMethod]
         public void Query_TimeSpan()
