@@ -1,62 +1,75 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Data.Net
 {
-    internal sealed class DataRowReader
+    internal sealed class DataRowReader<T>
     {
-        private readonly Dictionary<string, int> _dbColumnDictionary;
+        private const BindingFlags Flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
 
         private readonly int _fieldCount;
+
+        private readonly Func<T> _instance = Activator.CreateInstance<T>;//Expression.Lambda<Func<T>>(Expression.New(typeof(T))).Compile();
+
+        private readonly Type _type = typeof(T);
+
+        private readonly Dictionary<string, Action<T, object>> _setter;
 
         internal DataRowReader(int fieldCount)
         {
             _fieldCount = fieldCount;
-
-            if (_fieldCount > 1) _dbColumnDictionary = new Dictionary<string, int>(_fieldCount, StringComparer.Ordinal);
+            _setter = new Dictionary<string, Action<T, object>>(fieldCount, StringComparer.OrdinalIgnoreCase);
         }
 
-        internal T ReaderToType<T>(IDataReader reader)
+        internal T ReaderToType(IDataReader reader)
         {
-            if (typeof(T).IsValueType || typeof(T) == typeof(string))
+            var instance =  _instance();
+
+            var ok = false;
+
+            for (var i = 0; i < _fieldCount; i++)
             {
-                return (T)reader.GetValue(0);
+                if (reader.IsDBNull(i) || reader.GetValue(i) == DBNull.Value ||
+                    !Set(instance, reader[i], reader.GetName(i))) continue;
+
+                if (!ok) ok = true;
             }
 
-            var obj = Activator.CreateInstance<T>();
-            var properties = obj.GetType().GetProperties();
-
-            if (_dbColumnDictionary.Count == 0) CreateColumn(properties, reader);
-
-            var notNull = false;
-
-            foreach (var p in properties)
-            {
-                if (!_dbColumnDictionary.ContainsKey(p.Name) || reader.IsDBNull(_dbColumnDictionary[p.Name])) continue;
-
-                p.SetValue(obj,Convert.ChangeType(reader[p.Name], Nullable.GetUnderlyingType(p.PropertyType) ?? p.PropertyType,
-                                                                  CultureInfo.InvariantCulture), null);
-                if (!notNull) notNull = true;
-            }
-
-            return notNull ? obj : default(T);
+            return ok ? instance : default(T);
         }
 
-        internal void Flush() => _dbColumnDictionary?.Clear();
-
-        private void CreateColumn(IEnumerable<PropertyInfo> properties, IDataRecord reader)
+        private bool Set(T instance, object value, string propertyName)
         {
-            foreach (var prop in properties)
+            if (_setter.ContainsKey(propertyName))
             {
-                for (var i = 0; i < _fieldCount; i++)
-                {
-                    if (reader.GetName(i).Equals(prop.Name, StringComparison.OrdinalIgnoreCase))
-                        _dbColumnDictionary.Add(prop.Name, i);
-                }
+                _setter[propertyName](instance, value);
+                return true;
             }
+
+            var p = _type.GetProperty(propertyName, Flags);
+
+            if (p == null) return false;
+
+            var typeParameter = Expression.Parameter(typeof(T));
+            var valueParameter = Expression.Parameter(typeof(object));
+
+            var setter = Expression.Lambda<Action<T, object>>(
+                Expression.Assign(
+                    Expression.Property(
+                        Expression.Convert(typeParameter, _type), p),
+                    Expression.Convert(valueParameter, p.PropertyType)),
+                typeParameter, valueParameter);
+
+            _setter.Add(propertyName, setter.Compile());
+
+            _setter[propertyName](instance, value);
+
+            return true;
         }
+
+        internal void Clear() => _setter.Clear();
     }
 }

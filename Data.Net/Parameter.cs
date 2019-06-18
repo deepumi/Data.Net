@@ -4,16 +4,30 @@ namespace Data.Net
 {
     internal sealed class Parameter
     {
-        internal string Name { get; set; }
+        internal string Name { get; }
 
-        internal object Value { get; set; }
+        internal DbType DbType { get; }
 
-        internal DbType DbType { get; set; }
+        internal ParameterDirection Direction { get; }
 
-        internal ParameterDirection Direction { get; set; }
+        internal int Size { get; }
 
-        internal int Size { get; set; }
+        internal object Value { get; private set; }
 
-        internal bool IsOutputOrReturn { get; set; }
+        internal Parameter(string name, object value)
+        {
+            Name = name;
+            Value = value;
+        }
+
+        internal Parameter(string name, ParameterDirection direction, DbType dbType, int size)
+        {
+            Name = name;
+            Direction = direction;
+            DbType = dbType;
+            Size = size;
+        }
+
+        internal void SetValue(object value) => Value = value;
     }
 }

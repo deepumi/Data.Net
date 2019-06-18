@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Configuration;
+using System.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Data.Net.MsSql.Test
@@ -11,11 +13,11 @@ namespace Data.Net.MsSql.Test
         {
             using (var db = new Database())
             {
-               db.ExecuteNonQuery("DELETE FROM UserRoles_Test");
-               db.ExecuteNonQuery("DELETE FROM Users_Test");
+                db.ExecuteNonQuery("DELETE FROM UserRoles_Test");
+                db.ExecuteNonQuery("DELETE FROM Users_Test");
             }
         }
-         
+
         [AssemblyInitialize]
         public static void AssemblyInitialize(TestContext tc)
         {
@@ -23,12 +25,10 @@ namespace Data.Net.MsSql.Test
                                  VALUES (@FirstName,@LastName,@Email,@CreateDate) ";
             const string sqlUserRoles = "INSERT INTO UserRoles_Test(UserId,Role) VALUES (@UserId,@Role)";
 
-            using (var db = new Database())
+            using (var db = new Database(new SqlConnection(ConfigurationManager.ConnectionStrings["DemoDb"].ConnectionString), true))
             {
                 try
                 {
-                    db.BeginTransaction();
-
                     var parameters = new DataParameters
                     {
                         { "@FirstName", "User First Name" },
