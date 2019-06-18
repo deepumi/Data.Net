@@ -7,7 +7,8 @@ Since Data.Net is written in .NetStandard 2.0 no third party libraries are requi
 ## Supporting platforms
 Data.Net support multiple frameworks and platforms.
 
-*  Net Core 2.0 / ASP.NET Core 2.2 / ASP.NET Core 2.1 / ASP.NET Core 2.0.
+*  Net Core 2.2 / Net Core 2.1 / Net Core 2.0
+*  ASP.NET Core 2.2 / ASP.NET Core 2.1 / ASP.NET Core 2.0.
 *  Net Standard 2.0,
 *  NetFramework 4.8.0
 *  NetFramework 4.6.1 and above
