@@ -14,7 +14,7 @@ namespace Data.Net.PerformanceTest
                     using (var cmd = new SqlCommand("SELECT FirstName From Users_Test Where Email = @Email", db))
                     {
                         cmd.CommandType = CommandType.Text;
-                        cmd.Parameters.Add(new SqlParameter("Email", "deepumi@gmail.com"));
+                        cmd.Parameters.Add(new SqlParameter("Email", "email@gmail.com"));
 
                         if (db.State != ConnectionState.Open) db.Open();
 

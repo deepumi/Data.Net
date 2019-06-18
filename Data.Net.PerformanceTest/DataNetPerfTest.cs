@@ -13,7 +13,7 @@ namespace Data.Net.PerformanceTest
                 for (int i = 1; i < MaxLimit; i++)
                 {
                     var result = db.ExecuteScalar<string>("SELECT FirstName From Users_Test Where Email = @Email"
-                        , CommandType.Text, new DataParameters(1) { { "Email", "deepumi@gmail.com" } });
+                        , CommandType.Text, new DataParameters(1) { { "Email", "email@gmail.com" } });
                 }
             }
         }
@@ -25,10 +25,10 @@ namespace Data.Net.PerformanceTest
                 for (int i = 1; i < MaxLimit; i++)
                 {
                    var x =   await db.ExecuteScalarAsync<string>("SELECT FirstName From Users_Test Where Email = @Email"
-                        , CommandType.Text, new DataParameters(1) { { "Email", "deepumi@gmail.com" } });
+                        , CommandType.Text, new DataParameters(1) { { "Email", "email@gmail.com" } });
 
                     var y = db.ExecuteScalar<string>("SELECT FirstName From Users_Test Where Email = @Email"
-                        , CommandType.Text, new DataParameters(1) { { "Email", "deepumi@gmail.com" } });
+                        , CommandType.Text, new DataParameters(1) { { "Email", "email@gmail.com" } });
 
 
                 }
@@ -54,7 +54,7 @@ namespace Data.Net.PerformanceTest
                 for (int i = 1; i < MaxLimit; i++)
                 {
                     var x = db.QuerySingle<string>("SELECT FirstName From Users_Test Where Email = @Email"
-                        , CommandType.Text, new DataParameters(1) { { "Email", "deepumi@gmail.com" } },CommandBehavior.SingleRow);
+                        , CommandType.Text, new DataParameters(1) { { "Email", "email@gmail.com" } },CommandBehavior.SingleRow);
                 }
             }
         }

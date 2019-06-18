@@ -12,7 +12,7 @@ namespace Data.Net.PerformanceTest
                 for (int i = 1; i < MaxLimit; i++)
                 {
                     db.QuerySingle<string>("SELECT FirstName From Users_Test Where Email = @Email",
-                        new {Email = "deepumi@gmail.com"});
+                        new {Email = "email@gmail.com"});
                 }
             }
         }
