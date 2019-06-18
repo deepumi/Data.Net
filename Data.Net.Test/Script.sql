@@ -106,3 +106,15 @@ REFERENCES [dbo].[Users_Test] ([UserId])
 GO
 ALTER TABLE [dbo].[UserRoles_Test] CHECK CONSTRAINT [FK_Users_UserId]
 GO
+
+
+CREATE TABLE [dbo].[Address](
+	[Name] [nvarchar](50) NOT NULL,
+	[Address] [nvarchar](50) NULL,
+	[createdate] [datetime] NULL,
+	[Active] [int] NULL,
+	[AddressGuid] [uniqueidentifier] NULL
+) ON [PRIMARY]
+GO
+
+

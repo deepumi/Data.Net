@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Data.Net.MsSql.Test
@@ -9,6 +10,13 @@ namespace Data.Net.MsSql.Test
     public class QueryTest : TestBase,IDisposable
     {
         private readonly Database _db =  new Database();
+
+        [TestMethod]
+        public async Task Query_Enum_Async()
+        {
+            Address q = await _db.QuerySingleAsync<Address>("SELECT Active,Name From Address");
+            Assert.IsTrue(q?.Active == HelloEnum.Success);
+        }
 
         [TestMethod]
         public void Query_Single_String()
@@ -53,9 +61,16 @@ namespace Data.Net.MsSql.Test
         }
 
         [TestMethod]
+        public void Query_With_Single_Column_No_Parameter()
+        {
+            var q = _db.Query<User>("SELECT Email FROM Users_Test");
+            Assert.IsTrue(q.Count > 0);
+        }
+
+        [TestMethod]
         public void Query_With_DataParameter()
         {
-            var dataParameter = new DataParameters
+            var dataParameter = new DataParameters(1)
             {
                 { "@Email", "user1@domain.com" }
             };
@@ -66,7 +81,7 @@ namespace Data.Net.MsSql.Test
         [TestMethod]
         public void Query_With_SqlParameter()
         {
-            var sqlParamterList = new DataParameters
+            var sqlParamterList = new DataParameters(1)
             {
                 new SqlParameter("@Email", "user@domain.com")
             };
@@ -84,11 +99,11 @@ namespace Data.Net.MsSql.Test
         [TestMethod]
         public void Query_With_Multiple_Output_DataParameter()
         {
-            var dataParameter = new DataParameters()
+            var dataParameter = new DataParameters(3)
             {
                 { "@Email", "user1@domain.com" },
-                { "@RecordCount"},
-                { "@AnotherOutParameter"}
+                "@RecordCount",
+                "@AnotherOutParameter"
             };
             var q = _db.Query<User>("GetUsers_TEST", CommandType.StoredProcedure, dataParameter);
             Assert.IsTrue(q.Count > 0 && dataParameter.Value<int>("@RecordCount") > 0 &&
@@ -98,7 +113,7 @@ namespace Data.Net.MsSql.Test
         [TestMethod]
         public void Query_With_Multiple_Output_DbDataParameter()
         {
-            var dataParameter = new DataParameters
+            var dataParameter = new DataParameters(3)
             {
                 new SqlParameter("@Email", "user1@domain.com"),
                 new SqlParameter {ParameterName = "@RecordCount",Direction = ParameterDirection.Output,SqlDbType = SqlDbType.Int},
@@ -112,7 +127,7 @@ namespace Data.Net.MsSql.Test
         [TestMethod]
         public void Query_With_Return_Value_DataParameter()
         {
-            var dataParameter = new DataParameters
+            var dataParameter = new DataParameters(2)
             {
                 { "@Email", "user1@domain.com" },
                 { "@ReturnVal",ParameterDirection.ReturnValue}
@@ -141,7 +156,7 @@ namespace Data.Net.MsSql.Test
         [TestMethod]
         public void Query_With_Multiple_Output_ParameterMap()
         {
-            var dataParameter = new DataParameters
+            var dataParameter = new DataParameters(3)
             {
                 { "@Email", "user1@domain.com" },
                 { "@RecordCount" },

@@ -1,5 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Configuration;
+using System.Data.SqlClient;
+using System.Threading.Tasks;
 
 namespace Data.Net.MsSql.Test
 {
@@ -12,10 +15,22 @@ namespace Data.Net.MsSql.Test
             using (var db = new Database())
             {
                 var firstName = db.ExecuteScalar<string>("SELECT FirstName From Users_Test Where Email = @Email"
-                                ,parameters:new DataParameters{{"Email", "user@domain.com" } });
+                                ,parameters:new DataParameters(1){{"Email", "user@domain.com" } });
                 Assert.IsTrue(!string.IsNullOrWhiteSpace(firstName));
             }
-        } 
+        }
+
+        [TestMethod]
+        public async Task Execute_Query_Get_Single_Value_Async()
+        {
+            using (var db = new Database())
+            {
+                var firstName = await db.ExecuteScalarAsync<string>("SELECT FirstName From Users_Test Where Email = @Email"
+                                , parameters: new DataParameters(1) { { "Email", "user@domain.com" } });
+
+                Assert.IsTrue(!string.IsNullOrWhiteSpace(firstName));
+            }
+        }
 
         [TestMethod]
         public void Execute_Query_Insert_With_Transaction()
@@ -24,12 +39,10 @@ namespace Data.Net.MsSql.Test
                                  VALUES (@FirstName,@LastName,@Email,@CreateDate) ";
             const string sqlRoles = "INSERT INTO UserRoles_Test(UserId,Role) VALUES (@UserId,@Role)";
 
-            using (var db = new Database())
+            using (var db = new Database(new SqlConnection(ConfigurationManager.ConnectionStrings["DemoDb"].ConnectionString), true))
             {
                 try
                 {
-                    db.BeginTransaction();
-
                     for (var i = 1; i < 10; i++)
                     {
                         var parameters = new DataParameters
@@ -66,7 +79,7 @@ namespace Data.Net.MsSql.Test
             using (var db = new Database())
             {
                 var result = db.ExecuteNonQuery(sqlUser, parameters: new DataParameters { { "Email", "user@domain.com" } });
-                //Assert.IsTrue(result == 1);
+                Assert.IsTrue(result == 1);
             }
         }
     }

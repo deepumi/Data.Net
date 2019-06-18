@@ -9,9 +9,7 @@ namespace Data.Net
         {
             if (value == null || DBNull.Value == value) return default(T);
 
-            var type = Nullable.GetUnderlyingType(typeof(T));
-
-            return (T) Convert.ChangeType(value, type ?? typeof(T), CultureInfo.InvariantCulture);
+            return (T) Convert.ChangeType(value, Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T), CultureInfo.InvariantCulture);
         }
     }
 }
