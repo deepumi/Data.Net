@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
 
 namespace Data.Net
 {
@@ -7,17 +8,15 @@ namespace Data.Net
     {
         private readonly DataParameters _parameters;
 
-        private bool _hasOutPutParam;
-
-        internal readonly IDbCommand Command;
+        internal readonly DbCommand Command;
 
         internal CommandBuilder(string sql, IDbConnection connection, IDbTransaction transaction, bool oracleProvider,
             DataParameters parameters = null, CommandType commandType = CommandType.Text)
         {
-            Command = connection.CreateCommand();
+            Command = connection.CreateCommand() as DbCommand;
             Command.CommandText = sql ?? throw new ArgumentNullException(nameof(sql));
             Command.CommandType = commandType;
-            Command.Connection = connection;
+            Command.Connection = connection as DbConnection;
 
             if (oracleProvider)
             {
@@ -27,7 +26,7 @@ namespace Data.Net
 
             if (connection.State != ConnectionState.Open) connection.Open();
 
-            if (transaction != null) Command.Transaction = transaction;
+            if (transaction != null) Command.Transaction = transaction as DbTransaction;
 
             if (parameters == null) return;
 
@@ -47,9 +46,6 @@ namespace Data.Net
                         break;
                     case IDbDataParameter dataParameter:
                         Command.Parameters.Add(dataParameter);
-
-                        if (!_hasOutPutParam && dataParameter.Direction != 0 && dataParameter.Direction != ParameterDirection.Input) _hasOutPutParam = true;
-
                         break;
                 }
             }
@@ -62,32 +58,15 @@ namespace Data.Net
             p.Value = parameter.Value ?? DBNull.Value;
 
             if (parameter.Direction == 0 || parameter.Direction == ParameterDirection.Input) return p;
-
-            if (!_hasOutPutParam) _hasOutPutParam = true;
-
+            
             p.DbType = parameter.DbType;
             p.Direction = parameter.Direction;
             p.Size = parameter.Size;
+            
+            parameter.DbParameter = p;
+            
             return p;
-        }
-
-        internal void UpdateDataParameter()
-        {
-            if (!_hasOutPutParam || _parameters == null || Command.Parameters == null) return;
-
-            foreach (var item in _parameters)
-            {
-                switch (item)
-                {
-                    case Parameter p when p.Direction != 0 && p.Direction != ParameterDirection.Input:
-                        p.SetValue((Command.Parameters[p.Name] as IDbDataParameter)?.Value);
-                        break;
-                    case IDbDataParameter dp when dp.Direction != 0 && dp.Direction != ParameterDirection.Input:
-                        dp.Value = (Command.Parameters[dp.ParameterName] as IDbDataParameter)?.Value;
-                        break;
-                }
-            }
-        }
+        } 
 
         public void Dispose() => Command?.Dispose();
     }

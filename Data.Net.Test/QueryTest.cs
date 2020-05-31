@@ -14,7 +14,7 @@ namespace Data.Net.MsSql.Test
         [TestMethod]
         public async Task Query_Enum_Async()
         {
-            Address q = await _db.QuerySingleAsync<Address>("SELECT Active,Name From Address");
+            Address  q = await _db.QuerySingleAsync<Address>("SELECT Active,Name From Address");
             Assert.IsTrue(q?.Active == HelloEnum.Success);
         }
 

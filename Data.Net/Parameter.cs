@@ -12,7 +12,9 @@ namespace Data.Net
 
         internal int Size { get; }
 
-        internal object Value { get; private set; }
+        internal object Value { get;}
+
+        internal IDbDataParameter DbParameter { get; set; }
 
         internal Parameter(string name, object value)
         {
@@ -27,7 +29,5 @@ namespace Data.Net
             DbType = dbType;
             Size = size;
         }
-
-        internal void SetValue(object value) => Value = value;
     }
 }

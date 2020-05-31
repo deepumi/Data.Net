@@ -117,4 +117,5 @@ CREATE TABLE [dbo].[Address](
 ) ON [PRIMARY]
 GO
 
+INSERT INTO Address VALUES('Deepu Madhusoodanan', 'Add',getdate(),1,'08CEE763-675F-4234-A5E8-2A12122BC261')
 

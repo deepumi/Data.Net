@@ -38,7 +38,7 @@ namespace Data.Net
                 if (!ok) ok = true;
             }
 
-            return ok ? instance : default(T);
+            return ok ? instance : default;
         }
 
         private bool Set(T instance, object value, string propertyName)

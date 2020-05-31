@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 
 namespace Data.Net
 {
@@ -7,9 +6,9 @@ namespace Data.Net
     {
         internal static T ToValue<T>(this object value)
         {
-            if (value == null || DBNull.Value == value) return default(T);
+            if (value == null || DBNull.Value == value) return default;
 
-            return (T) Convert.ChangeType(value, Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T), CultureInfo.InvariantCulture);
+            return (T)value;
         }
     }
 }

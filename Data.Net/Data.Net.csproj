@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461;net462;net47;net471;net472;net48;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;net461;net462;net47;net471;net472;net48;</TargetFrameworks>
+    <LangVersion>8.0</LangVersion>
     <AssemblyName>Data.Net</AssemblyName>
     <RootNamespace>Data.Net</RootNamespace>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
@@ -37,5 +38,9 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="DbDataParameterExtensions.cs" />
   </ItemGroup>
 </Project>

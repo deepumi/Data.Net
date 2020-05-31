@@ -32,6 +32,33 @@ namespace Data.Net
         }
 
         /// <summary>
+        /// Returns database output or return parameter to <see cref="IDbDataParameter"/>.  
+        /// </summary>
+        /// <param name="index">Array index</param>
+        /// <returns></returns>
+        public IDbDataParameter this[int index]
+        {
+            get
+            {
+                if (index <= 0 || index > _parameters.Count - 1) return default;
+
+                return _parameters[index] switch
+                {
+                    Parameter p when IsOutPutOrReturnParameter(p.Direction) => p.DbParameter,
+                    IDbDataParameter dp when IsOutPutOrReturnParameter(dp.Direction) => dp,
+                    _ => default,
+                };
+            }
+        }
+
+        /// <summary>
+        /// Returns database output or return parameter to <see cref="IDbDataParameter"/>.
+        /// </summary>
+        /// <param name="name">Output parameter name</param>
+        /// <returns></returns>
+        public IDbDataParameter this[string name] => GetDbParameter(name);
+
+        /// <summary>
         /// Add IDbDataParameter type object. <see cref="IDbDataParameter"/>
         /// </summary>
         /// <param name="parameter"></param>
@@ -70,33 +97,54 @@ namespace Data.Net
         }
 
         /// <summary>
-        /// Return database output / return parameter value.
+        /// Returns database output or return parameter value.
         /// </summary>
         /// <typeparam name="T">Type of the parameter</typeparam>
         /// <param name="name">Name of the parameter</param>
         /// <returns></returns>
         public T Value<T>(string name)
         {
-            if (name == null) return default(T);
+            var parameter = GetDbParameter(name);
 
-            for (var i = 0; i < _parameters.Count; i++)
+            return parameter?.Value == null ? default : parameter.Value.ToValue<T>();
+        }
+        
+        /// <summary>
+        /// Returns database output or return parameter value.
+        /// </summary>
+        /// <param name="name">Name of the parameter</param>
+        /// <returns></returns>
+        public object GetObject(string name)
+        {
+            var parameter = GetDbParameter(name);
+
+            return parameter?.Value;
+        }
+        
+        private IDbDataParameter GetDbParameter(string name)
+        {
+            if (name == null) return default;
+
+            for (var i = _parameters.Count - 1; i >= 0; i--)
             {
                 switch (_parameters[i])
                 {
-                    case Parameter p when p.Direction != 0 && p.Direction != ParameterDirection.Input && string.Compare(p.Name, name, StringComparison.OrdinalIgnoreCase) == 0:
-                        return p.Value.ToValue<T>();
+                    case Parameter p when IsOutPutOrReturnParameter(p.Direction) && 
+                                          string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase):
+                        return p.DbParameter;
 
-                    case IDbDataParameter dp when dp.Direction != 0 && dp.Direction != ParameterDirection.Input && string.Compare(dp.ParameterName, name, StringComparison.OrdinalIgnoreCase) == 0:
-                        return dp.Value.ToValue<T>();
+                    case IDbDataParameter dp when IsOutPutOrReturnParameter(dp.Direction) && 
+                                                  string.Equals(dp.ParameterName, name, StringComparison.OrdinalIgnoreCase):
+                        return dp;
                 }
             }
-
-            return default(T);
+ 
+            return default;
         }
 
         /// <inheritdoc />
         /// <summary>
-        /// Return parameter enumerator object.
+        /// Return enumerator object.
         /// </summary>
         /// <returns></returns>
         public IEnumerator<object> GetEnumerator() => _parameters.GetEnumerator();
@@ -104,5 +152,8 @@ namespace Data.Net
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
          
         private static void Throw(string parameter) => throw new ArgumentNullException(parameter);
+        
+        private static bool IsOutPutOrReturnParameter(ParameterDirection direction)
+            => direction != 0 && direction != ParameterDirection.Input;
     }
 }
