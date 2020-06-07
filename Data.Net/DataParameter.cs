@@ -46,7 +46,7 @@ namespace Data.Net
                 {
                     Parameter p when IsOutPutOrReturnParameter(p.Direction) => p.DbParameter,
                     IDbDataParameter dp when IsOutPutOrReturnParameter(dp.Direction) => dp,
-                    _ => default,
+                    _ => default
                 };
             }
         }

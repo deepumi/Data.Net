@@ -2,18 +2,25 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <LangVersion>7.3</LangVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.11.5" />
     <PackageReference Include="Dapper" Version="1.60.6" />
+    <PackageReference Include="MySql.Data" Version="8.0.20" />
+    <PackageReference Include="Npgsql" Version="4.1.3.1" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.70" />
     <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ORMS\Massive\src\Massive.Oracle.csproj" />
     <ProjectReference Include="..\Data.Net\Data.Net.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="tnsnames.ora" />
   </ItemGroup>
 
 </Project>

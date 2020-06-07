@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Data.Net.Providers;
 
 namespace Data.Net
 {
@@ -17,7 +18,7 @@ namespace Data.Net
 
         private readonly IDbTransaction _transaction;
 
-        private readonly bool _oracleProvider;
+        private readonly DbProvider _dbProvider;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Database" /> class.
@@ -26,7 +27,7 @@ namespace Data.Net
         public Database(IDbConnection connection)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(_connection));
-            _oracleProvider = GetDbDataProvider(_connection.GetType().FullName);
+            _dbProvider = ProviderFactory.GetDbProvider(connection.GetType().FullName);
         }
 
         /// <inheritdoc />
@@ -80,10 +81,10 @@ namespace Data.Net
         /// <returns></returns>
         public int ExecuteNonQuery(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
             var result = builder.Command.ExecuteNonQuery();
-            
+
             return result.ToValue<int>();
         }
 
@@ -98,8 +99,8 @@ namespace Data.Net
         public async Task<int> ExecuteNonQueryAsync(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null, CancellationToken token = default)
         {
             using var builder =
-                new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
+                new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
@@ -119,11 +120,23 @@ namespace Data.Net
         /// <returns></returns>
         public T ExecuteScalar<T>(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
-            var result = builder.Command.ExecuteScalar();
-            
+            var result = ExecuteScalar(sql, commandType, parameters);
+
             return result.ToValue<T>();
+        }
+
+        /// <summary>
+        /// Executes a Transact-SQL statement and returns a single value from the first row/column.
+        /// </summary>
+        /// <param name="sql">Transact-SQL statement</param>
+        /// <param name="commandType">One of the command type of <see cref="CommandType" /></param>
+        /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
+        /// <returns></returns>
+        public object ExecuteScalar(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null)
+        {
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
+            return builder.Command.ExecuteScalar();
         }
 
         /// <summary>
@@ -137,9 +150,8 @@ namespace Data.Net
         /// <returns></returns>
         public async Task<T> ExecuteScalarAsync<T>(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null, CancellationToken token = default)
         {
-            using var builder =
-                new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
@@ -160,10 +172,10 @@ namespace Data.Net
         public IDataReader ExecuteReader(string sql, CommandType commandType = CommandType.Text,
             DataParameters parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
             var reader = builder.Command.ExecuteReader(behavior);
-            
+
             return reader;
         }
 
@@ -179,8 +191,8 @@ namespace Data.Net
         public async Task<IDataReader> ExecuteReaderAsync(string sql, CommandType commandType = CommandType.Text,
             DataParameters parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection, CancellationToken token = default)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
@@ -204,10 +216,10 @@ namespace Data.Net
         {
             var list = default(List<T>);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
             using var reader = builder.Command.ExecuteReader(behavior);
-            
+
             var row = new DataRowReader<T>(reader.FieldCount);
 
             while (reader.Read())
@@ -216,11 +228,11 @@ namespace Data.Net
 
                 if (obj == null) continue;
 
-                if (list == default(List<T>)) list = new List<T>();
+                list ??= new List<T>();
 
                 list.Add(obj);
             }
-            
+
             row.Clear();
 
             return list;
@@ -240,12 +252,12 @@ namespace Data.Net
         {
             var result = default(T);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
 
             using var reader = builder.Command.ExecuteReader(behavior);
-            
+
             if (!reader.Read()) return result;
-                    
+
             if (typeof(T).IsValueType || typeof(T) == typeof(string))
                 return reader.IsDBNull(0) ? default : reader.GetValue(0).ToValue<T>();
 
@@ -273,16 +285,16 @@ namespace Data.Net
         {
             var result = default(T);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _oracleProvider, parameters, commandType);
-            
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
 
             using var reader = await builder.Command.ExecuteReaderAsync(behavior, token);
-            
+
             if (!await reader.ReadAsync(token)) return result;
-                    
+
             if (typeof(T).IsValueType || typeof(T) == typeof(string))
                 return await reader.IsDBNullAsync(0, token) ? default : reader.GetValue(0).ToValue<T>();
 
@@ -296,6 +308,14 @@ namespace Data.Net
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        public TEntity Insert<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Insert(entity, this);
+        
+        /// <summary>
         /// Commit a transaction
         /// </summary>
         public void CommitTransaction() => _transaction?.Commit();
@@ -304,8 +324,5 @@ namespace Data.Net
         /// Rollback a transaction
         /// </summary>
         public void RollbackTransaction() => _transaction?.Rollback();
-
-        private static bool GetDbDataProvider(string fullName) => fullName.IndexOf("Oracle.DataAccess", StringComparison.OrdinalIgnoreCase) == 0 ||
-                                                                  fullName.IndexOf("Oracle.ManagedDataAccess", StringComparison.OrdinalIgnoreCase) == 0;
     }
 }

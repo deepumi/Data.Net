@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using Data.Net.Providers;
 
 namespace Data.Net
 {
@@ -10,7 +11,7 @@ namespace Data.Net
 
         internal readonly DbCommand Command;
 
-        internal CommandBuilder(string sql, IDbConnection connection, IDbTransaction transaction, bool oracleProvider,
+        internal CommandBuilder(string sql, IDbConnection connection, IDbTransaction transaction, DbProvider dbProvider,
             DataParameters parameters = null, CommandType commandType = CommandType.Text)
         {
             Command = connection.CreateCommand() as DbCommand;
@@ -18,7 +19,7 @@ namespace Data.Net
             Command.CommandType = commandType;
             Command.Connection = connection as DbConnection;
 
-            if (oracleProvider)
+            if (dbProvider is OracleProvider)
             {
                 var bindByName = Command.GetType().GetProperty("BindByName");
                 bindByName?.SetValue(Command, true, null);
