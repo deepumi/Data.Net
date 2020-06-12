@@ -1,4 +1,5 @@
 ﻿﻿using System;
+ using System.Data;
 
  namespace Data.Net.Generator
 {
@@ -6,15 +7,22 @@
     {
         internal string ColumName { get; }
         
-        internal Action<object> AutoIncrementActionSetter { get;}
+        internal Action<object> AutoIncrementSetter { get;}
         
         internal string SequenceName { get; }
+
+        internal IAutoIncrementRetriever AutoIncrementRetriever { get; }
+
+        internal DbType PropertyType { get; }
         
-        internal AutoIncrementInfo(string columName, string sequenceName, Action<object> action)
+        internal AutoIncrementInfo(string columName, string sequenceName, IAutoIncrementRetriever retrieve,
+            Action<object> action, Type propertyType)
         {
             ColumName = columName;
-            AutoIncrementActionSetter = action;
             SequenceName = sequenceName;
+            AutoIncrementRetriever = retrieve;
+            AutoIncrementSetter = action;
+            PropertyType = DbTypeHelper.GetType(propertyType);
         }
     }
 }

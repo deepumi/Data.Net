@@ -14,7 +14,7 @@ namespace Data.Net.Generator
 
             var result = CreateInsertColumNames();
 
-            return new InsertSqlResult(result, dataParameters, MetaData.AutoIncrementInfo?.AutoIncrementActionSetter);
+            return new InsertSqlResult(result, dataParameters);
         }
 
         private string CreateInsertColumNames()
@@ -38,7 +38,7 @@ namespace Data.Net.Generator
 
             var identityInserted = string.Empty;
             
-            if (MetaData.AutoIncrementInfo?.AutoIncrementActionSetter != null)
+            if (MetaData.AutoIncrementInfo?.AutoIncrementSetter != null)
                 identityInserted = "SELECT LAST_INSERT_ID();";
 
             comma = string.Empty;

@@ -11,7 +11,7 @@ namespace Data.Net.Generator
         protected internal BaseInsertQueryBuilder(EntityMetaData metaData) => MetaData = metaData;
 
         protected internal abstract InsertSqlResult BuildInsertQuery();
-        
+            
         protected DataParameters CreateDataParameters()
         {
             var dp = new DataParameters(MetaData.PropertiesList.Count);

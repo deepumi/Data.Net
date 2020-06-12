@@ -18,12 +18,20 @@ namespace Data.Net.Providers
             
             db.ExecuteNonQuery(result.Query, CommandType.Text, result.DataParameters);
 
-            if (result.AutoIncrementSetter == null) return entity;
+            if (metaData.AutoIncrementInfo?.AutoIncrementSetter == null || metaData.AutoIncrementInfo.AutoIncrementRetriever == null) return entity;
 
             var dataPrameter = result.DataParameters[":" + metaData.AutoIncrementInfo.ColumName];
 
-            if (dataPrameter?.Value != null && dataPrameter.Value != DBNull.Value)
-                result.AutoIncrementSetter(dataPrameter.Value);
+            if (dataPrameter?.Value == null || dataPrameter.Value == DBNull.Value) return entity;
+            
+            if (metaData.AutoIncrementInfo.AutoIncrementRetriever != null)
+            {
+                metaData.AutoIncrementInfo.AutoIncrementRetriever.Retrieve(dataPrameter.Value);
+            }
+            else
+            {
+                metaData.AutoIncrementInfo.AutoIncrementSetter(dataPrameter.Value); //call action setter
+            }
 
             return entity;
         }

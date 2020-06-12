@@ -10,7 +10,7 @@ namespace Data.Net.Generator
         
         protected internal override InsertSqlResult BuildInsertQuery()
         {
-            return new InsertSqlResult(CreateInsertColumNames(), CreateDataParameters(), MetaData.AutoIncrementInfo?.AutoIncrementActionSetter);
+            return new InsertSqlResult(CreateInsertColumNames(), CreateDataParameters());
         }
        
         private string CreateInsertColumNames()
@@ -34,7 +34,7 @@ namespace Data.Net.Generator
 
             var identityInserted = string.Empty;
             
-            if (MetaData.AutoIncrementInfo?.AutoIncrementActionSetter != null)
+            if (MetaData.AutoIncrementInfo?.AutoIncrementSetter != null)
                 identityInserted = "RETURNING "+ MetaData.AutoIncrementInfo.ColumName;
 
             comma = string.Empty;    

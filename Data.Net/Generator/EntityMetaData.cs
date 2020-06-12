@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Data.Net.Generator
@@ -36,21 +37,36 @@ namespace Data.Net.Generator
             {
                 var columnProperty = properties[i].GetCustomAttribute<ColumnAttribute>(false);
 
-                if (properties[i].GetSetMethod() == null || (columnProperty != null && columnProperty.IgnoreColumn)) continue;
+                if (properties[i].GetSetMethod() == null || columnProperty != null && columnProperty.IgnoreColumn) continue;
 
                 var columnName = columnProperty?.Name ?? properties[i].Name;
 
                 PropertiesList.Add(new PropertyPair(columnName, properties[i].GetValue(_entity, null)));
 
+                if(AutoIncrementInfo != null) continue;
+                
                 var autoIncrement = properties[i].GetCustomAttribute<AutoIncrementAttribute>(false);
 
                 var sequence = autoIncrement as OracleSequenceAttribute;
-                
+
                 if (autoIncrement == null) continue;
 
                 var index = i;
 
-                AutoIncrementInfo = new AutoIncrementInfo(columnName, sequence?.SequenceName,b => properties[index].SetValue(_entity, b));
+                Action<object> autoIncrementSetter = default;
+
+                IAutoIncrementRetriever retrieve = default;
+
+                if (_entity is IAutoIncrementRetriever retriever)
+                {
+                    retrieve = retriever;
+                }
+                else
+                {
+                    autoIncrementSetter = b => properties[index].SetValue(_entity, b);
+                }
+
+                AutoIncrementInfo = new AutoIncrementInfo(columnName, sequence?.SequenceName, retrieve, autoIncrementSetter,properties[i].PropertyType);
             }
         }
     }

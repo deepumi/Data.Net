@@ -15,11 +15,11 @@ namespace Data.Net.Providers
             
             if (result == null) return entity;
             
-            if (result.AutoIncrementSetter != null)
+            if (metaData.AutoIncrementInfo?.AutoIncrementSetter != null)
             {
                 var identity = db.ExecuteScalar(result.Query, CommandType.Text, result.DataParameters);
 
-                result.AutoIncrementSetter(identity);
+                metaData.AutoIncrementInfo.AutoIncrementSetter(identity);
             }
             else
             {

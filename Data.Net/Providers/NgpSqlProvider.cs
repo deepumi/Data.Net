@@ -16,12 +16,12 @@ namespace Data.Net.Providers
 
             if (result == null) return entity;
             
-            if (result.AutoIncrementSetter != null)
+            if (metaData.AutoIncrementInfo?.AutoIncrementSetter != null)
             {
                 var identityValue = db.ExecuteScalar(result.Query, CommandType.Text, result.DataParameters);
 
                 if(identityValue != null && identityValue != DBNull.Value)
-                    result.AutoIncrementSetter(identityValue);
+                    metaData.AutoIncrementInfo.AutoIncrementSetter(identityValue);
             }
             else
             {
