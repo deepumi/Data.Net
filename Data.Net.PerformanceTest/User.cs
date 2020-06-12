@@ -1,7 +1,4 @@
-﻿using System;
-using Massive;
-
-namespace Data.Net.PerformanceTest
+﻿namespace Data.Net.PerformanceTest
 {
     [TableName("Users_Test")] //SQLSERVER
     public sealed class User

@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ORMS\Massive\src\Massive.Oracle.csproj" />
     <ProjectReference Include="..\Data.Net\Data.Net.csproj" />
   </ItemGroup>
 
