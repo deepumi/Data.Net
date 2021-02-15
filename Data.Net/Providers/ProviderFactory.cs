@@ -4,16 +4,16 @@ namespace Data.Net.Providers
 {
     internal static class ProviderFactory
     {
-        internal static DbProvider GetDbProvider(string typeName)
+        internal static DbProvider GetDbProvider(string type)
         {
-            return typeName switch
+            return type switch
             {
-                "Oracle.DataAccess.Client.OracleConnection" => new OracleProvider(),
-                "Oracle.ManagedDataAccess.Client.OracleConnection" => new OracleProvider(),
-                "System.Data.SqlClient.SqlConnection" => new MsSqlProvider(),
-                "Microsoft.Data.SqlClient.SqlConnection" => new MsSqlProvider(),
-                "MySql.Data.MySqlClient.MySqlConnection" => new MySqlProvider(),
-                "Npgsql.NpgsqlConnection" => new NgpSqlProvider(),
+                "OracleConnection" => new OracleProvider(),
+                "SqlConnection" => new SqlServerProvider(),
+                "MySqlConnection" => new MySqlProvider(),
+                "NpgsqlConnection" => new NgpSqlProvider(),
+                "SQLiteConnection" => new SqlLiteProvider(),
+                "SqliteConnection" => new SqlLiteProvider(),
                 _ => throw new Exception("provider does not support!")
             };
         }

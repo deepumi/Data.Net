@@ -40,7 +40,7 @@ namespace Data.Net
         {
             get
             {
-                if (index <= 0 || index > _parameters.Count - 1) return default;
+                if (index < 0 || index > _parameters.Count - 1) return default;
 
                 return _parameters[index] switch
                 {
@@ -107,18 +107,6 @@ namespace Data.Net
             var parameter = GetDbParameter(name);
 
             return parameter?.Value == null ? default : parameter.Value.ToValue<T>();
-        }
-        
-        /// <summary>
-        /// Returns database output or return parameter value.
-        /// </summary>
-        /// <param name="name">Name of the parameter</param>
-        /// <returns></returns>
-        public object GetObject(string name)
-        {
-            var parameter = GetDbParameter(name);
-
-            return parameter?.Value;
         }
         
         private IDbDataParameter GetDbParameter(string name)

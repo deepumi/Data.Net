@@ -3,7 +3,7 @@ using Data.Net.Generator;
 
 namespace Data.Net.Providers
 {
-    internal sealed class MsSqlProvider : DbProvider
+    internal sealed class SqlServerProvider : DbProvider
     {
         internal override TEntity Insert<TEntity>(TEntity entity, Database db)
         {

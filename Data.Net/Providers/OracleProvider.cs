@@ -6,6 +6,8 @@ namespace Data.Net.Providers
 {
     internal sealed class OracleProvider : DbProvider
     {
+        protected internal override string PrameterDelimiter => ":";
+
         internal override TEntity Insert<TEntity>(TEntity entity, Database db)
         {
             var metaData = GetEntityMetaData(entity);
@@ -18,9 +20,9 @@ namespace Data.Net.Providers
             
             db.ExecuteNonQuery(result.Query, CommandType.Text, result.DataParameters);
 
-            if (metaData.AutoIncrementInfo?.AutoIncrementSetter == null || metaData.AutoIncrementInfo.AutoIncrementRetriever == null) return entity;
+            if (metaData.AutoIncrementInfo?.AutoIncrementSetter == null) return entity; // || metaData.AutoIncrementInfo.AutoIncrementRetriever == null
 
-            var dataPrameter = result.DataParameters[":" + metaData.AutoIncrementInfo.ColumName];
+            var dataPrameter = result.DataParameters[PrameterDelimiter + metaData.AutoIncrementInfo.ColumName];
 
             if (dataPrameter?.Value == null || dataPrameter.Value == DBNull.Value) return entity;
             

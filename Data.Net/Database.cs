@@ -27,7 +27,7 @@ namespace Data.Net
         public Database(IDbConnection connection)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(_connection));
-            _dbProvider = ProviderFactory.GetDbProvider(connection.GetType().FullName);
+            _dbProvider = ProviderFactory.GetDbProvider(_connection.GetType().Name);
         }
 
         /// <inheritdoc />
@@ -61,17 +61,6 @@ namespace Data.Net
         public Database(string connectionStringName) : this(DbConnectionFactory.OpenConnection(connectionStringName ?? throw new ArgumentNullException(nameof(connectionStringName)))) {}
 #endif
 
-        /// <inheritdoc />
-        /// <summary>
-        ///  Dispose Database connection and transaction objects.
-        /// </summary>
-        public void Dispose()
-        {
-            _transaction?.Dispose();
-            _connection?.Close();
-            _connection?.Dispose();
-        }
-
         /// <summary>
         /// Executes a Transact-SQL statement and returns the number of rows affected by an insert,update or delete.
         /// </summary>
@@ -79,12 +68,12 @@ namespace Data.Net
         /// <param name="commandType">One of the command type of <see cref="CommandType" /></param>
         /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
         /// <returns></returns>
-        public int ExecuteNonQuery(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null)
+        public int ExecuteNonQuery(string sql, CommandType commandType = CommandType.Text, object parameters = null)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
-
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            
             var result = builder.Command.ExecuteNonQuery();
-
+            
             return result.ToValue<int>();
         }
 
@@ -96,12 +85,11 @@ namespace Data.Net
         /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
         /// <param name="token">Cancellation token <see cref="CancellationToken" /></param>
         /// <returns></returns>
-        public async Task<int> ExecuteNonQueryAsync(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null, CancellationToken token = default)
+        public async Task<int> ExecuteNonQueryAsync(string sql, CommandType commandType = CommandType.Text, object parameters = null, CancellationToken token = default)
         {
-            using var builder =
-                new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
-
-            if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            
+            if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
 
@@ -118,9 +106,9 @@ namespace Data.Net
         /// <param name="commandType">One of the command type of <see cref="CommandType" /></param>
         /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
         /// <returns></returns>
-        public T ExecuteScalar<T>(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null)
+        public T ExecuteScalar<T>(string sql, CommandType commandType = CommandType.Text, object parameters = null)
         {
-            var result = ExecuteScalar(sql, commandType, parameters);
+            var result = ExecuteScalar(sql, commandType, parameters.ToDataParameters(_dbProvider.PrameterDelimiter));
 
             return result.ToValue<T>();
         }
@@ -132,9 +120,9 @@ namespace Data.Net
         /// <param name="commandType">One of the command type of <see cref="CommandType" /></param>
         /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
         /// <returns></returns>
-        public object ExecuteScalar(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null)
+        public object ExecuteScalar(string sql, CommandType commandType = CommandType.Text, object parameters = null)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
 
             return builder.Command.ExecuteScalar();
         }
@@ -148,11 +136,11 @@ namespace Data.Net
         /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
         /// <param name="token">Cancellation token <see cref="CancellationToken" /></param>
         /// <returns></returns>
-        public async Task<T> ExecuteScalarAsync<T>(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null, CancellationToken token = default)
+        public async Task<T> ExecuteScalarAsync<T>(string sql, CommandType commandType = CommandType.Text, object parameters = null, CancellationToken token = default)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
 
-            if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
+            if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
 
@@ -170,13 +158,11 @@ namespace Data.Net
         /// <param name="behavior">One of the command behavior <see cref="CommandBehavior" /></param>
         /// <returns></returns>
         public IDataReader ExecuteReader(string sql, CommandType commandType = CommandType.Text,
-            DataParameters parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection)
+            object parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
 
-            var reader = builder.Command.ExecuteReader(behavior);
-
-            return reader;
+            return builder.Command.ExecuteReader(behavior);
         }
 
         /// <summary>
@@ -189,11 +175,11 @@ namespace Data.Net
         /// <param name="token">Cancellation token <see cref="CancellationToken" /></param>
         /// <returns></returns>
         public async Task<IDataReader> ExecuteReaderAsync(string sql, CommandType commandType = CommandType.Text,
-            DataParameters parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection, CancellationToken token = default)
+            object parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection, CancellationToken token = default)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
 
-            if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
+            if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
 
@@ -211,15 +197,15 @@ namespace Data.Net
         /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
         /// <param name="behavior">One of the command behavior <see cref="CommandBehavior" /></param>
         /// <returns></returns>
-        public List<T> Query<T>(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null,
+        public List<T> Query<T>(string sql, CommandType commandType = CommandType.Text, object parameters = null,
             CommandBehavior behavior = CommandBehavior.CloseConnection)
         {
             var list = default(List<T>);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
-
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            
             using var reader = builder.Command.ExecuteReader(behavior);
-
+            
             var row = new DataRowReader<T>(reader.FieldCount);
 
             while (reader.Read())
@@ -232,9 +218,9 @@ namespace Data.Net
 
                 list.Add(obj);
             }
-
+            
             row.Clear();
-
+            
             return list;
         }
 
@@ -247,17 +233,17 @@ namespace Data.Net
         /// <param name="parameters">Parameter collection of <see cref="DataParameters" /> class.</param>
         /// <param name="behavior">One of the command behavior <see cref="CommandBehavior" /></param>
         /// <returns></returns>
-        public T QuerySingle<T>(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null,
+        public T QuerySingle<T>(string sql, CommandType commandType = CommandType.Text, object parameters = null,
             CommandBehavior behavior = CommandBehavior.CloseConnection)
         {
             var result = default(T);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
-
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            
             using var reader = builder.Command.ExecuteReader(behavior);
-
+            
             if (!reader.Read()) return result;
-
+            
             if (typeof(T).IsValueType || typeof(T) == typeof(string))
                 return reader.IsDBNull(0) ? default : reader.GetValue(0).ToValue<T>();
 
@@ -280,21 +266,21 @@ namespace Data.Net
         /// <param name="behavior">One of the command behavior <see cref="CommandBehavior" /></param>
         /// <param name="token">Cancellation token <see cref="CancellationToken" /></param>
         /// <returns></returns>
-        public async Task<T> QuerySingleAsync<T>(string sql, CommandType commandType = CommandType.Text, DataParameters parameters = null,
+        public async Task<T> QuerySingleAsync<T>(string sql, CommandType commandType = CommandType.Text, object parameters = null,
             CommandBehavior behavior = CommandBehavior.CloseConnection, CancellationToken token = default)
         {
             var result = default(T);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters, commandType);
-
-            if (builder.Command.Connection.State != ConnectionState.Open) await builder.Command.Connection.OpenAsync(token);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            
+            if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
             if (_transaction != null) builder.Command.Transaction = _transaction as DbTransaction;
 
             using var reader = await builder.Command.ExecuteReaderAsync(behavior, token);
 
             if (!await reader.ReadAsync(token)) return result;
-
+                
             if (typeof(T).IsValueType || typeof(T) == typeof(string))
                 return await reader.IsDBNullAsync(0, token) ? default : reader.GetValue(0).ToValue<T>();
 
@@ -316,6 +302,55 @@ namespace Data.Net
         public TEntity Insert<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Insert(entity, this);
         
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="setStatement"></param>
+        /// <param name="whereClause"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public int Update(string tableName, string setStatement, string whereClause, object parameters)
+        {
+            var setStatementString = setStatement.IndexOf("SET", StringComparison.OrdinalIgnoreCase) == -1
+                ? "SET " + setStatement
+                : setStatement;
+
+            var whereCondition = whereClause.IndexOf("where", StringComparison.OrdinalIgnoreCase) == -1
+                ? "WHERE " + whereClause
+                : whereClause;
+
+            var sql = $"UPDATE {tableName} {setStatementString} {whereCondition}";
+            
+            return ExecuteNonQuery(sql, CommandType.Text, parameters);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="whereClause"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public int Delete(string tableName, string whereClause, object parameters)
+        {
+            var whereCondition = whereClause.IndexOf("where", StringComparison.OrdinalIgnoreCase) == -1
+                ? "WHERE " + whereClause
+                : whereClause;
+
+            var sql = $"DELETE FROM {tableName} {whereCondition}";
+            
+            return ExecuteNonQuery(sql, CommandType.Text, parameters);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public Task<int> DeleteAsync(string sql, object parameters) => ExecuteNonQueryAsync(sql, CommandType.Text, parameters.ToDataParameters(_dbProvider.PrameterDelimiter));
+
+        /// <summary>
         /// Commit a transaction
         /// </summary>
         public void CommitTransaction() => _transaction?.Commit();
@@ -324,5 +359,16 @@ namespace Data.Net
         /// Rollback a transaction
         /// </summary>
         public void RollbackTransaction() => _transaction?.Rollback();
+        
+        /// <inheritdoc />
+        /// <summary>
+        ///  Dispose Database connection and transaction objects.
+        /// </summary>
+        public void Dispose()
+        {
+            _transaction?.Dispose();
+            _connection?.Close();
+            _connection?.Dispose();
+        }
     }
 }

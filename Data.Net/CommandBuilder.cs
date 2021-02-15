@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Data.Net.Providers;
 
 namespace Data.Net
@@ -11,8 +14,19 @@ namespace Data.Net
 
         internal readonly DbCommand Command;
 
+        //Sync constructor
         internal CommandBuilder(string sql, IDbConnection connection, IDbTransaction transaction, DbProvider dbProvider,
-            DataParameters parameters = null, CommandType commandType = CommandType.Text)
+            DataParameters parameters = null, CommandType commandType = CommandType.Text) : this(sql, connection, dbProvider,
+                parameters, commandType)
+        {
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            if (transaction != null) Command.Transaction = transaction as DbTransaction;
+        }
+
+        // Async constructor
+        internal CommandBuilder(string sql, IDbConnection connection, DbProvider dbProvider,
+           DataParameters parameters = null, CommandType commandType = CommandType.Text)
         {
             Command = connection.CreateCommand() as DbCommand;
             Command.CommandText = sql ?? throw new ArgumentNullException(nameof(sql));
@@ -21,20 +35,18 @@ namespace Data.Net
 
             if (dbProvider is OracleProvider)
             {
-                var bindByName = Command.GetType().GetProperty("BindByName");
+                var bindByName = Command.GetType().GetProperty("BindByName", BindingFlags.Public | BindingFlags.Instance);
                 bindByName?.SetValue(Command, true, null);
             }
 
-            if (connection.State != ConnectionState.Open) connection.Open();
-
-            if (transaction != null) Command.Transaction = transaction as DbTransaction;
-
             if (parameters == null) return;
-
+            
             _parameters = parameters;
 
             AddParam();
         }
+
+        internal Task OpenAsync(CancellationToken token) => Command.Connection.OpenAsync(token);
 
         private void AddParam()
         {
@@ -59,15 +71,15 @@ namespace Data.Net
             p.Value = parameter.Value ?? DBNull.Value;
 
             if (parameter.Direction == 0 || parameter.Direction == ParameterDirection.Input) return p;
-            
+
             p.DbType = parameter.DbType;
             p.Direction = parameter.Direction;
             p.Size = parameter.Size;
-            
+
             parameter.DbParameter = p;
-            
+
             return p;
-        } 
+        }
 
         public void Dispose() => Command?.Dispose();
     }

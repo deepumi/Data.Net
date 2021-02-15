@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -79,7 +80,46 @@ namespace Data.Net.MsSql.Test
             using (var db = new Database())
             {
                 var result = db.ExecuteNonQuery(sqlUser, parameters: new DataParameters { { "Email", "user@domain.com" } });
-                Assert.IsTrue(result == 1);
+                Assert.IsTrue(result > 0);
+            }
+        }
+
+        [TestMethod]
+        public void Update_Test()
+        {
+            const string email = "user@domain.com";
+
+            const string sqlUser =
+                @"UPDATE [Users_Test] SET FirstName = @FirstName Where Email = @Email";
+
+            object a1 = new { FirstName = "Deepu", Email = email };
+
+            var dict = new Dictionary<string, object>
+            {
+                ["@FirstName"] = "Deepu",
+                ["@Email"] = email
+            };
+
+            var list = new List<KeyValuePair<string, object>>
+            {
+                new KeyValuePair<string, object>("FirstName", "Deepu"),
+                new KeyValuePair<string, object>("Email", email)
+            };
+
+            var kvp = new KeyValuePair<string, object>[2];
+            kvp[0] = new KeyValuePair<string, object>("FirstName", "Deepu");
+            kvp[1] = new KeyValuePair<string, object>("Email", email);
+
+            using (var db = new Database())
+            {
+                //var result = db.Update(sqlUser, kvp);
+
+               // Assert.IsTrue(result > 0);
+            }
+
+            using (var conn = new SqlConnection(ConfigurationManager.ConnectionStrings[0].ConnectionString))
+            {
+               conn.Insert(new User { FirstName = "Deepu", LastName = "Darsh", Email = "darsh.deepu@hotmail.com" });
             }
         }
     }

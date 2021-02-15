@@ -13,7 +13,7 @@ namespace Data.Net
 
         internal static IDbConnection OpenConnection(string connectionStringName = null)
         {
-            if(ConfigurationManager.ConnectionStrings.Count == 0) throw new InvalidOperationException("Please specify a connection string in configuration connection string section");
+            if(ConfigurationManager.ConnectionStrings.Count == 0) throw new InvalidOperationException("Please specify a connection string in web.config configuration connection string section");
 
             var defaultConnectionString = connectionStringName == null ? ConfigurationManager.ConnectionStrings[0] : ConfigurationManager.ConnectionStrings[connectionStringName];
         

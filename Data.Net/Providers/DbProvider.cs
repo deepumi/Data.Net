@@ -4,6 +4,8 @@ namespace Data.Net.Providers
 {
     internal abstract class DbProvider
     {
+        protected internal virtual string PrameterDelimiter => "@";
+
         internal abstract TEntity Insert<TEntity>(TEntity entity, Database db) where TEntity : class;
         
         protected static EntityMetaData GetEntityMetaData<TEntity>(TEntity entity) where TEntity : class

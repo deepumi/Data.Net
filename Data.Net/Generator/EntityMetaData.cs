@@ -6,6 +6,8 @@ namespace Data.Net.Generator
 {
     internal sealed class EntityMetaData
     {
+        private static readonly BindingFlags _flags = BindingFlags.Public | BindingFlags.Instance;
+        
         private readonly object _entity;
 
         internal string TableName { get; }
@@ -20,16 +22,16 @@ namespace Data.Net.Generator
 
             _entity = entity;
 
-            var tableName = type.GetCustomAttribute<TableNameAttribute>(false);
+            var tableInfo = type.GetCustomAttribute<TableNameAttribute>(false);
 
-            TableName = string.IsNullOrEmpty(tableName?.TableName) ? type.Name : tableName.TableName;
+            TableName = string.IsNullOrEmpty(tableInfo?.TableName) ? type.Name : tableInfo.TableName;
 
             BindProperties(type);
         }
 
         private void BindProperties(IReflect type)
         {
-            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var properties = type.GetProperties(_flags);
 
             PropertiesList = new List<PropertyPair>(properties.Length);
 

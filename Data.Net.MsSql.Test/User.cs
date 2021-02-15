@@ -1,5 +1,6 @@
 ﻿namespace Data.Net.MsSql.Test
 {
+    [TableName("Users_Test")]
     public class User
     {
         public string FirstName { get; set; }
