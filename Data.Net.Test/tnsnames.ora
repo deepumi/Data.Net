@@ -1,8 +1,0 @@
-COSDB =
-  (DESCRIPTION =
-    (ADDRESS = (PROTOCOL = TCP)(HOST = 172.16.0.139)(PORT = 1521))
-    (CONNECT_DATA =
-      (SERVER = DEDICATED)
-      (SERVICE_NAME = cosdev)
-    )
-  )
