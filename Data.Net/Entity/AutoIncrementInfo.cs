@@ -1,11 +1,11 @@
-﻿﻿using System;
- using System.Data;
+﻿using System;
+using System.Data;
 
- namespace Data.Net.Generator
+namespace Data.Net
 {
     internal sealed class AutoIncrementInfo
     {
-        internal string ColumName { get; }
+        internal string ColumnName { get; }
         
         internal Action<object> AutoIncrementSetter { get;}
         
@@ -15,10 +15,10 @@
 
         internal DbType PropertyType { get; }
         
-        internal AutoIncrementInfo(string columName, string sequenceName, IAutoIncrementRetriever retrieve,
+        internal AutoIncrementInfo(string columnName, string sequenceName, IAutoIncrementRetriever retrieve,
             Action<object> action, Type propertyType)
         {
-            ColumName = columName;
+            ColumnName = columnName;
             SequenceName = sequenceName;
             AutoIncrementRetriever = retrieve;
             AutoIncrementSetter = action;

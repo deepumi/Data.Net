@@ -4,7 +4,6 @@ using System.Data;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
-using Data.Net.Providers;
 
 namespace Data.Net
 {
@@ -27,7 +26,7 @@ namespace Data.Net
         public Database(IDbConnection connection)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(_connection));
-            _dbProvider = ProviderFactory.GetDbProvider(_connection.GetType().Name);
+            _dbProvider = DbProviderFactory.GetDbProvider(_connection.GetType().Name);
         }
 
         /// <inheritdoc />
@@ -70,7 +69,7 @@ namespace Data.Net
         /// <returns></returns>
         public int ExecuteNonQuery(string sql, CommandType commandType = CommandType.Text, object parameters = null)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
             
             var result = builder.Command.ExecuteNonQuery();
             
@@ -87,7 +86,7 @@ namespace Data.Net
         /// <returns></returns>
         public async Task<int> ExecuteNonQueryAsync(string sql, CommandType commandType = CommandType.Text, object parameters = null, CancellationToken token = default)
         {
-            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
             
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
@@ -108,7 +107,7 @@ namespace Data.Net
         /// <returns></returns>
         public T ExecuteScalar<T>(string sql, CommandType commandType = CommandType.Text, object parameters = null)
         {
-            var result = ExecuteScalar(sql, commandType, parameters.ToDataParameters(_dbProvider.PrameterDelimiter));
+            var result = ExecuteScalar(sql, commandType, parameters.ToDataParameters(_dbProvider.ParameterDelimiter));
 
             return result.ToValue<T>();
         }
@@ -122,7 +121,7 @@ namespace Data.Net
         /// <returns></returns>
         public object ExecuteScalar(string sql, CommandType commandType = CommandType.Text, object parameters = null)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
 
             return builder.Command.ExecuteScalar();
         }
@@ -138,7 +137,7 @@ namespace Data.Net
         /// <returns></returns>
         public async Task<T> ExecuteScalarAsync<T>(string sql, CommandType commandType = CommandType.Text, object parameters = null, CancellationToken token = default)
         {
-            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
 
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
@@ -160,7 +159,7 @@ namespace Data.Net
         public IDataReader ExecuteReader(string sql, CommandType commandType = CommandType.Text,
             object parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection)
         {
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
 
             return builder.Command.ExecuteReader(behavior);
         }
@@ -177,7 +176,7 @@ namespace Data.Net
         public async Task<IDataReader> ExecuteReaderAsync(string sql, CommandType commandType = CommandType.Text,
             object parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection, CancellationToken token = default)
         {
-            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
 
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
@@ -202,7 +201,7 @@ namespace Data.Net
         {
             var list = default(List<T>);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
             
             using var reader = builder.Command.ExecuteReader(behavior);
             
@@ -238,7 +237,7 @@ namespace Data.Net
         {
             var result = default(T);
 
-            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _transaction, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
             
             using var reader = builder.Command.ExecuteReader(behavior);
             
@@ -271,7 +270,7 @@ namespace Data.Net
         {
             var result = default(T);
 
-            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.PrameterDelimiter), commandType);
+            using var builder = new CommandBuilder(sql, _connection, _dbProvider, parameters.ToDataParameters(_dbProvider.ParameterDelimiter), commandType);
             
             if (builder.Command.Connection.State != ConnectionState.Open) await builder.OpenAsync(token);
 
@@ -300,7 +299,23 @@ namespace Data.Net
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
         public TEntity Insert<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Insert(entity, this);
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public TEntity Update<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Update(entity, this);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public TEntity Delete<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Delete(entity, this);
+
         /// <summary>
         /// 
         /// </summary>
@@ -348,7 +363,7 @@ namespace Data.Net
         /// <param name="sql"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public Task<int> DeleteAsync(string sql, object parameters) => ExecuteNonQueryAsync(sql, CommandType.Text, parameters.ToDataParameters(_dbProvider.PrameterDelimiter));
+        public Task<int> DeleteAsync(string sql, object parameters) => ExecuteNonQueryAsync(sql, CommandType.Text, parameters.ToDataParameters(_dbProvider.ParameterDelimiter));
 
         /// <summary>
         /// Commit a transaction

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 
-namespace Data.Net.Generator
+namespace Data.Net
 {
     internal static class DbTypeHelper
     {

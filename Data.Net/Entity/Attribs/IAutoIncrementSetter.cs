@@ -8,7 +8,7 @@
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="autoIcrementValue"></param>
-        void Retrieve(object autoIcrementValue);
+        /// <param name="autoIncrementValue"></param>
+        void Retrieve(object autoIncrementValue);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Data.Net.Generator
+﻿namespace Data.Net
 {
     internal sealed class PropertyPair
     {

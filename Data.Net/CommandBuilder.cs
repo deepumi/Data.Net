@@ -4,7 +4,6 @@ using System.Data.Common;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Data.Net.Providers;
 
 namespace Data.Net
 {

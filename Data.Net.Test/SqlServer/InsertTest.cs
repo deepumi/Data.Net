@@ -7,17 +7,18 @@ namespace Data.Net.Test.SqlServer
 {
     public class InsertTest : IDisposable
     {
-        private readonly Database _database = new Database(new SqlConnection(ConnectionString.SqlServerConnectionString));
+        private readonly Database _database = new Database(new SqlConnection());
 
         private const string StudentTable = nameof(StudentInsert);
 
-        public InsertTest() => CreateTable();
+        //public InsertTest() => CreateTable();
 
         [Fact]
         public void Insert_Model_With_Identity_Return()
         {
             var student = new StudentInsert
             {
+                Id = 240,
                 Name = "Jon",
                 Gender = "Male",
                 Age = 25
