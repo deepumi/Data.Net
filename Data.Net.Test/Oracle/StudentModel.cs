@@ -1,34 +1,14 @@
 ﻿namespace Data.Net.Test.Oracle
 {
-    public abstract class StudentBase
+    public class StudentInsert
     {
-        [OracleSequence(SequenceName = BaseOracle.SequenceName)]
-        public decimal Id { get; set; }
+        [OracleSequence(SequenceName = OracleSequenceHelper.SequenceName)]
+        public long Id { get; set; }
 
         public string Name { get; set; }
 
         public string Gender { get; set; }
         
         public decimal Age { get; set; }
-    }
-    
-    public class StudentInsert : StudentBase
-    {
-        
-    }
-    
-    public class StudentQuery : StudentBase
-    {
-     
-    }
-    
-    public class StudentUpdate : StudentBase
-    {
-        
-    }
-    
-    public class StudentDelete : StudentBase
-    {
-        
     }
 }

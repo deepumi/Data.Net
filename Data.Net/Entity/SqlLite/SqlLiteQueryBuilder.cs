@@ -12,12 +12,12 @@ namespace Data.Net
         {
             var dataParameters = CreateDataParameters(metaData);
 
-            var result = CreateInsertColumNames(metaData);
+            var result = CreateInsertColumnNames(metaData);
 
             return new SqlResult(result, dataParameters);
         }
 
-        private string CreateInsertColumNames(EntityMetaData metaData)
+        private string CreateInsertColumnNames(EntityMetaData metaData)
         {
             var sb = new StringBuilder();
 
@@ -25,7 +25,7 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name)) continue;
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
 
                 sb.Append(comma + metaData.PropertiesList[i].Name);
 
@@ -45,7 +45,7 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name)) continue;
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
 
                 var paramName = ParameterDelimiter + metaData.PropertiesList[i].Name;
 

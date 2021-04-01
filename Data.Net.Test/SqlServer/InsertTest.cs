@@ -5,20 +5,19 @@ using Xunit;
 
 namespace Data.Net.Test.SqlServer
 {
-    public class InsertTest : IDisposable
+    public sealed class InsertTest : IDisposable
     {
-        private readonly Database _database = new Database(new SqlConnection());
+        private readonly Database _database = new Database(new SqlConnection(ConnectionString.SqlServerConnectionString));
 
         private const string StudentTable = nameof(StudentInsert);
 
-        //public InsertTest() => CreateTable();
+        public InsertTest() => CreateTable();
 
         [Fact]
         public void Insert_Model_With_Identity_Return()
         {
             var student = new StudentInsert
             {
-                Id = 240,
                 Name = "Jon",
                 Gender = "Male",
                 Age = 25
@@ -80,12 +79,11 @@ namespace Data.Net.Test.SqlServer
 
             var studentId = dataParameters.Value<int>("@StudentId"); //return output parameter StudentId.
 
-            //another way to return
-            //var IDbParameterObject =  dataParameters[3]?.Value; //OR dataParameters["@StudentId"]?.Value; 
+            //another way to get Identity return value.
+            //object studentId =  dataParameters[3]?.Value; //OR dataParameters["@StudentId"]?.Value; 
             Assert.True(result == 1);
 
             Assert.True(studentId > 0);
-            
         }
 
         private void DropTable()
@@ -98,6 +96,7 @@ namespace Data.Net.Test.SqlServer
 
         private void CreateTable()
         {
+            DropTable();
             var table = @$"CREATE TABLE {StudentTable}
                         (
                             Id INT IDENTITY(1,1) PRIMARY KEY,

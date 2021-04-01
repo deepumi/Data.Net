@@ -2,12 +2,12 @@
 {
     internal static class ConnectionString
     {
-        internal const string SqlServerConnectionString = "Data Source=Initial Catalog=DataNet;Integrated Security=True";
+        internal static readonly string SqlServerConnectionString = AppSettings.Config["ConnectionStrings:SqlServerConnectionString"];
 
-        internal const string PostgresSqlConnectionString = "";
+        internal static readonly string OracleConnectionString = AppSettings.Config["ConnectionStrings:OracleConnectionString"];
 
-        internal const string MySqlConnectionString = "";
-        
-        internal const string OracleConnectionString = "";
+        internal static readonly string PostgresSqlConnectionString = "";
+
+        internal static readonly string MySqlConnectionString = "";
     }
 }

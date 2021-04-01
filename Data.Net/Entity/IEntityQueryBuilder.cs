@@ -1,6 +1,6 @@
 ﻿namespace Data.Net
 {
-    interface IEntityQueryBuilder
+    internal interface IEntityQueryBuilder
     {
         string ParameterDelimiter { get; }
 
@@ -9,5 +9,7 @@
         SqlResult UpdateQuery(EntityMetaData metaData);
 
         SqlResult DeleteQuery(EntityMetaData metaData);
+
+        SqlResult SelectQuery(EntityMetaData metaData);
     }
 }

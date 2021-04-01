@@ -2,9 +2,9 @@
 {
     internal sealed class SqlResult
     {
-        public string Query { get; }
+        internal readonly string Query;
 
-        public DataParameters DataParameters { get; }
+        internal readonly DataParameters DataParameters;
 
         internal SqlResult(string query, DataParameters dataParameters)
         {

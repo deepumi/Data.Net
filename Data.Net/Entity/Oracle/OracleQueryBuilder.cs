@@ -14,7 +14,7 @@ namespace Data.Net
             var dataParameters = CreateDataParameters(metaData);
 
             if (dataParameters != null && metaData.AutoIncrementInfo != null && !string.IsNullOrEmpty(metaData.AutoIncrementInfo.ColumnName))
-                dataParameters.Add(ParameterDelimiter + metaData.AutoIncrementInfo.ColumnName, ParameterDirection.Output, metaData.AutoIncrementInfo.PropertyType);
+                dataParameters.Add(string.Concat(ParameterDelimiter, metaData.AutoIncrementInfo.ColumnName), ParameterDirection.Output, metaData.AutoIncrementInfo.PropertyType);
 
             return new SqlResult(CreateInsertColumnNames(metaData), dataParameters);
         }
@@ -29,12 +29,13 @@ namespace Data.Net
             {
                 var columnName = metaData.PropertiesList[i].Name;
                 
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name))
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name))
                 {
                     if (string.IsNullOrEmpty(metaData.AutoIncrementInfo.SequenceName)) continue;
                 }
 
-                sb.Append(comma + columnName);
+                sb.Append(comma);
+                sb.Append(columnName);
 
                 comma = ",";
             }
@@ -46,7 +47,7 @@ namespace Data.Net
             var identityInserted = string.Empty;
 
             if (metaData.AutoIncrementInfo?.AutoIncrementSetter != null)
-                identityInserted = $"RETURNING {metaData.AutoIncrementInfo.ColumnName} INTO :{metaData.AutoIncrementInfo.ColumnName}";
+                identityInserted = string.Concat("RETURNING ", metaData.AutoIncrementInfo.ColumnName, " INTO :", metaData.AutoIncrementInfo.ColumnName);
 
             comma = string.Empty;    
 
@@ -54,18 +55,19 @@ namespace Data.Net
             {
                 string paramName;
                 
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name))
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name))
                 {
                     if (metaData.AutoIncrementInfo == null || string.IsNullOrEmpty(metaData.AutoIncrementInfo.SequenceName)) continue;
                     
-                    paramName = metaData.AutoIncrementInfo?.SequenceName + ".NEXTVAL";
+                    paramName = string.Concat(metaData.AutoIncrementInfo?.SequenceName, ".NEXTVAL");
                 }
                 else
                 {
-                    paramName = ParameterDelimiter + metaData.PropertiesList[i].Name;
+                    paramName = string.Concat(ParameterDelimiter,metaData.PropertiesList[i].Name);
                 }
 
-                sb.Append(comma + paramName);
+                sb.Append(comma);
+                sb.Append(paramName);
 
                 comma = ",";
             }

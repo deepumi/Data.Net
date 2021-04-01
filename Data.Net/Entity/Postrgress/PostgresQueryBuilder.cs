@@ -21,7 +21,7 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name)) continue;
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
 
                 sb.Append(comma + metaData.PropertiesList[i].Name);
 
@@ -41,7 +41,7 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name)) continue;
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
 
                 var paramName = ParameterDelimiter + metaData.PropertiesList[i].Name;
 

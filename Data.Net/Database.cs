@@ -314,7 +314,15 @@ namespace Data.Net
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public TEntity Delete<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Delete(entity, this);
+        public bool Delete<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Delete(entity, this);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public TEntity Get<TEntity>(TEntity entity) where TEntity : class => _dbProvider.Get(entity, this);
 
         /// <summary>
         /// 

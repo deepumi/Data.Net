@@ -16,8 +16,8 @@ namespace Data.Net
 
         internal List<PropertyPair> PropertiesList { get; private set; }
 
-        internal KeyInfo KeyInfo { get; private set; }
-        
+        internal string KeyInfo { get; private set; }
+
         internal EntityMetaData(object entity)
         {
             var type = entity.GetType();
@@ -31,6 +31,10 @@ namespace Data.Net
             BindProperties(type);
         }
 
+        internal bool IsAutoIncrement(string key) => AutoIncrementInfo != null &&
+                                            key.Equals(AutoIncrementInfo.ColumnName,
+                                                StringComparison.OrdinalIgnoreCase);
+        
         private void BindProperties(IReflect type)
         {
             var properties = type.GetProperties(Flags);
@@ -41,32 +45,22 @@ namespace Data.Net
             {
                 var columnProperty = properties[i].GetCustomAttribute<ColumnAttribute>(false);
 
-                if (properties[i].GetSetMethod() == null || columnProperty != null && columnProperty.IgnoreColumn) continue;
+                if (properties[i].GetSetMethod() == null ||
+                    columnProperty != null && columnProperty.IgnoreColumn) continue;
 
                 var columnName = columnProperty?.Name ?? properties[i].Name;
 
                 PropertiesList.Add(new PropertyPair(columnName, properties[i].GetValue(_entity, null)));
 
-                KeyInfo ??= CreateKeyInfo(properties[i], columnName);
-                
-                if(AutoIncrementInfo != null) continue;
+                if (string.IsNullOrEmpty(KeyInfo) && properties[i].GetCustomAttribute<KeyAttribute>(false) != null)
+                    KeyInfo = columnName;
+
+                if (AutoIncrementInfo != null) continue;
 
                 var autoIncrementInfo = CreateAutoIncrementInfo(properties[i], columnName);
 
                 if (autoIncrementInfo != null) AutoIncrementInfo = autoIncrementInfo;
             }
-        }
-
-        private static KeyInfo CreateKeyInfo(PropertyInfo property, string columnName)
-        {
-            var keyInfo = property.GetCustomAttribute<KeyAttribute>(false);
-
-            if (keyInfo != null)
-            {
-                return new KeyInfo(columnName, property.PropertyType);
-            }
-
-            return null;
         }
 
         private AutoIncrementInfo CreateAutoIncrementInfo(PropertyInfo property, string columnName)

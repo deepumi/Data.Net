@@ -9,20 +9,11 @@ namespace Data.Net
 
         internal PostgresProvider(IEntityQueryBuilder query) : base(query.ParameterDelimiter) => _query = query;
 
-        internal override TEntity Delete<TEntity>(TEntity entity, Database db)
-        {
-            var result = _query.DeleteQuery(CreateMetaData(entity));
-
-            if (result == null) return entity;
-
-            db.ExecuteNonQuery(result.Query, CommandType.Text, result.DataParameters);
-
-            return entity;
-        }
+        internal override bool Delete<TEntity>(TEntity entity, Database db) => _query.Delete(entity, db);
 
         internal override TEntity Insert<TEntity>(TEntity entity, Database db)
         {
-            var metaData = CreateMetaData(entity);
+            var metaData = new EntityMetaData(entity);
 
             var result = _query.InsertQuery(metaData);
 
@@ -43,15 +34,8 @@ namespace Data.Net
             return entity;
         }
 
-        internal override TEntity Update<TEntity>(TEntity entity, Database db)
-        {
-            var result = _query.UpdateQuery(CreateMetaData(entity));
+        internal override TEntity Update<TEntity>(TEntity entity, Database db) => _query.Update(entity, db);
 
-            if (result == null) return entity;
-
-            db.ExecuteNonQuery(result.Query, CommandType.Text, result.DataParameters);
-
-            return entity;
-        }
+        internal override TEntity Get<TEntity>(TEntity entity, Database db) => _query.Get(entity, db);
     }
 }

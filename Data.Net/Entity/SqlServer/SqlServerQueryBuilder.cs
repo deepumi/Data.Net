@@ -8,14 +8,17 @@ namespace Data.Net
 
         public override SqlResult InsertQuery(EntityMetaData metaData)
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder("INSERT INTO ");
 
-            sb.Append("INSERT INTO " + metaData.TableName);
+            sb.Append(metaData.TableName);
 
             CreateColumnNames(sb, metaData);
 
             if (metaData.AutoIncrementInfo?.AutoIncrementSetter != null)
-                sb.Append("output INSERTED." + metaData.AutoIncrementInfo.ColumnName);
+            {
+                sb.Append("output INSERTED.");
+                sb.Append(metaData.AutoIncrementInfo.ColumnName);
+            }
 
             CreateColumnValues(sb, metaData);
 
@@ -26,7 +29,7 @@ namespace Data.Net
             return new SqlResult(sql, CreateDataParameters(metaData));
         }
 
-        private void CreateColumnNames(StringBuilder sb, EntityMetaData metaData)
+        private static void CreateColumnNames(StringBuilder sb, EntityMetaData metaData)
         {
             var comma = string.Empty;
 
@@ -34,7 +37,7 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name)) continue;
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
 
                 sb.Append(comma);
                 sb.Append(metaData.PropertiesList[i].Name);
@@ -53,8 +56,8 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name)) continue;
-
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
+                
                 sb.Append(comma);
                 sb.Append(ParameterDelimiter);
                 sb.Append(metaData.PropertiesList[i].Name);

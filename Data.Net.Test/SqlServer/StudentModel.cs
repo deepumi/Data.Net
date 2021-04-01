@@ -2,7 +2,7 @@
 {
     public abstract class StudentBase
     {
-        [Key]
+        [AutoIncrement]
         public int Id { get; set; }
 
         public string Name { get; set; }

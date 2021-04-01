@@ -18,15 +18,18 @@ namespace Data.Net
 
         private readonly Dictionary<string, Action<T, object>> _setter;
 
+        private readonly Dictionary<string, PropertyInfo> _propertyInfo;
+
         internal DataRowReader(int fieldCount)
         {
             _fieldCount = fieldCount;
             _setter = new Dictionary<string, Action<T, object>>(fieldCount, StringComparer.OrdinalIgnoreCase);
+            _propertyInfo = GetPropertyInfoByColumnNameAttribute();
         }
 
         internal T ReaderToType(IDataReader reader)
         {
-            var instance =  _instance();
+            var instance = _instance();
 
             var ok = false;
 
@@ -41,6 +44,24 @@ namespace Data.Net
             return ok ? instance : default;
         }
 
+        private Dictionary<string, PropertyInfo> GetPropertyInfoByColumnNameAttribute()
+        {
+            var dictionary = new Dictionary<string, PropertyInfo>(_fieldCount, StringComparer.OrdinalIgnoreCase);
+
+            var properties = _type.GetProperties(Flags);
+
+            for (var i = 0; i < properties.Length; i++)
+            {
+                var prop = properties[i].GetCustomAttribute<ColumnAttribute>(false);
+
+                if (prop == null || string.IsNullOrEmpty(prop.Name) || properties[i].GetSetMethod() == null || prop.IgnoreColumn) continue;
+
+                 dictionary[prop.Name] = properties[i];
+            }
+
+            return dictionary;
+        }
+
         private bool Set(T instance, object value, string propertyName)
         {
             if (_setter.ContainsKey(propertyName))
@@ -49,9 +70,17 @@ namespace Data.Net
                 return true;
             }
 
-            var p = _type.GetProperty(propertyName, Flags);
+            var prop = _type.GetProperty(propertyName, Flags);
 
-            if (p == null) return false;
+            if (prop == null)
+            {
+                if (_propertyInfo == null || !_propertyInfo.ContainsKey(propertyName))
+                {
+                    return false;
+                }
+
+                prop = _propertyInfo[propertyName];
+            }
 
             var typeParameter = Expression.Parameter(typeof(T));
             var valueParameter = Expression.Parameter(typeof(object));
@@ -59,8 +88,8 @@ namespace Data.Net
             var setter = Expression.Lambda<Action<T, object>>(
                 Expression.Assign(
                     Expression.Property(
-                        Expression.Convert(typeParameter, _type), p),
-                    Expression.Convert(valueParameter, p.PropertyType)),
+                        Expression.Convert(typeParameter, _type), prop),
+                    Expression.Convert(valueParameter, prop.PropertyType)),
                 typeParameter, valueParameter);
 
             _setter.Add(propertyName, setter.Compile());

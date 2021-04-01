@@ -23,7 +23,8 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (keyValue == null && (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name) || metaData.KeyInfo != null))
+                if (keyValue == null && (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name) || string.Equals(metaData.KeyInfo,
+                    metaData.PropertiesList[i].Name,StringComparison.OrdinalIgnoreCase)))
                 {
                     columnName = metaData.PropertiesList[i].Name;
                     keyValue = metaData.PropertiesList[i].Value;
@@ -48,9 +49,7 @@ namespace Data.Net
             sb.Append(" WHERE ");
 
             if (string.IsNullOrEmpty(columnName) || keyValue == null)
-            {
                 throw new Exception("Update failed, cannot obtain Key or Auto Increment column or value");
-            }
 
             sb.Append(columnName);
             sb.Append("=");
@@ -64,39 +63,67 @@ namespace Data.Net
         {
             var sb = new StringBuilder("DELETE FROM " + metaData.TableName);
 
-            object keyValue = default;
-
-            string columnName = default;
-
-            var dp = new DataParameters(1);
+            DataParameters dp = null;
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (keyValue == null && (IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name) || metaData.KeyInfo != null))
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name) || 
+                    string.Equals(metaData.KeyInfo,
+                        metaData.PropertiesList[i].Name,StringComparison.OrdinalIgnoreCase))
                 {
-                    columnName = metaData.PropertiesList[i].Name;
-                    keyValue = metaData.PropertiesList[i].Value;
-                    dp.Add(columnName, keyValue);
+                    dp = new DataParameters(1)
+                    {
+                        {metaData.PropertiesList[i].Name, metaData.PropertiesList[i].Value}
+                    };
+
+                    sb.Append(" WHERE ");
+
+                    sb.Append(metaData.PropertiesList[i].Name);
+                    sb.Append("=");
+                    sb.Append(ParameterDelimiter);
+                    sb.Append(metaData.PropertiesList[i].Name);
+
+                    break;
                 }
             }
 
-            sb.Append("  WHERE ");
-
-            if (string.IsNullOrEmpty(columnName) || keyValue == null)
-            {
+            if (dp == null)
                 throw new Exception("Unable to perform DELETE operation. Cannot obtain Key or Auto Increment column or value");
-            }
-
-            sb.Append(columnName);
-            sb.Append("=");
-            sb.Append(ParameterDelimiter);
-            sb.Append(columnName);
 
             return new SqlResult(sb.ToString(), dp);
         }
 
-        protected internal static bool IsAutoIncrement(AutoIncrementInfo autoInfo, string key) => autoInfo != null &&
-                                                      key.Equals(autoInfo.ColumnName, StringComparison.OrdinalIgnoreCase);
+        public SqlResult SelectQuery(EntityMetaData metaData)
+        {
+            var sb = new StringBuilder("SELECT * FROM " + metaData.TableName);
+
+            DataParameters dp = null;
+
+            for (var i = 0; i < metaData.PropertiesList.Count; i++)
+            {
+                if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name) || string.Equals(metaData.KeyInfo,
+                    metaData.PropertiesList[i].Name,StringComparison.OrdinalIgnoreCase))
+                {
+                    dp = new DataParameters(1)
+                    {
+                        { metaData.PropertiesList[i].Name, metaData.PropertiesList[i].Value }
+                    };
+
+                    sb.Append("  WHERE ");
+                    sb.Append(metaData.PropertiesList[i].Name);
+                    sb.Append("=");
+                    sb.Append(ParameterDelimiter);
+                    sb.Append(metaData.PropertiesList[i].Name);
+
+                    break;
+                }
+            }
+
+            if (dp == null)
+                throw new Exception("Unable to perform SELECT operation. Cannot obtain Key or Auto Increment column or value");
+
+            return new SqlResult(sb.ToString(), dp);
+        }
 
         protected DataParameters CreateDataParameters(EntityMetaData metaData, bool insert = true)
         {
@@ -104,7 +131,7 @@ namespace Data.Net
 
             for (var i = 0; i < metaData.PropertiesList.Count; i++)
             {
-                if (insert && (metaData.PropertiesList[i].Name == null || IsAutoIncrement(metaData.AutoIncrementInfo, metaData.PropertiesList[i].Name))) continue;
+                if (insert && (string.IsNullOrEmpty(metaData.PropertiesList[i].Name) || metaData.IsAutoIncrement(metaData.PropertiesList[i].Name))) continue;
 
                 dp.Add(ParameterDelimiter + metaData.PropertiesList[i].Name, metaData.PropertiesList[i].Value);
             }

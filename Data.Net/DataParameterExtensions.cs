@@ -5,7 +5,7 @@ namespace Data.Net
 {
     internal static class DataParameterExtensions
     {
-        internal static DataParameters ToDataParameters(this object parameters, string parameterDelimter)
+        internal static DataParameters ToDataParameters(this object parameters, string parameterDelimiter)
         {
             DataParameters dataParameters;
 
@@ -23,7 +23,7 @@ namespace Data.Net
 
                     foreach (var item in dict)
                     {
-                        dataParameters.Add(AddParameterDelimiter(item.Key, parameterDelimter), item.Value);
+                        dataParameters.Add(AddParameterDelimiter(item.Key, parameterDelimiter), item.Value);
                     }
 
                     return dataParameters;
@@ -36,7 +36,7 @@ namespace Data.Net
 
                         for (var i = 0; i < list.Count; i++)
                         {
-                            dataParameters.Add(AddParameterDelimiter(list[i].Key, parameterDelimter), list[i].Value);
+                            dataParameters.Add(AddParameterDelimiter(list[i].Key, parameterDelimiter), list[i].Value);
                         }
 
                         return dataParameters;
@@ -46,7 +46,7 @@ namespace Data.Net
 
                     foreach (var item in kvp)
                     {
-                        dataParameters.Add(AddParameterDelimiter(item.Key, parameterDelimter), item.Value);
+                        dataParameters.Add(AddParameterDelimiter(item.Key, parameterDelimiter), item.Value);
                     }
 
                     return dataParameters;
@@ -61,20 +61,20 @@ namespace Data.Net
                     {
                         var obj = properties[i].GetValue(parameters);
 
-                        dataParameters.Add(AddParameterDelimiter(properties[i].Name, parameterDelimter), obj);
+                        dataParameters.Add(AddParameterDelimiter(properties[i].Name, parameterDelimiter), obj);
                     }
 
                     return dataParameters;
             }
         }
 
-        private static string AddParameterDelimiter(string key, string parameterDelimter)
+        private static string AddParameterDelimiter(string key, string parameterDelimiter)
         {
             if (key == null) return string.Empty;
 
             return key[0] >= 65 && key[0] <= 90 // A-Z
                           || key[0] >= 97 && key[0] <= 122 // a-z
-                ? parameterDelimter + key
+                ? parameterDelimiter + key
                 : key;
         }
     }

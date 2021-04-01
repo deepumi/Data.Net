@@ -186,5 +186,34 @@ namespace Data.Net
         /// <param name="parameters"></param>
         /// <returns></returns>
         public static int Delete(this IDbConnection conn, string tableName, string whereClause, object parameters) => new Database(conn).Delete(tableName,whereClause,parameters);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="entity"></param>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        public static bool Delete<TEntity>(this IDbConnection conn, TEntity entity) where TEntity : class => new Database(conn).Delete(entity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static TEntity Get<TEntity>(this IDbConnection conn, TEntity entity) where TEntity : class =>
+         new Database(conn).Get(entity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static TEntity Update<TEntity>(this IDbConnection conn, TEntity entity) where TEntity : class =>
+         new Database(conn).Update(entity);
     }
 }
