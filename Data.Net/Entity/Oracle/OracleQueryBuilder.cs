@@ -5,7 +5,7 @@ namespace Data.Net
 {
     internal sealed class OracleQueryBuilder : EntityQueryBuilder
     {
-        private const string Sql = "INSERT INTO {0} ({1}) VALUES({2}) {3}";
+        private const string InsertSql = "INSERT INTO {0} ({1}) VALUES({2}) {3}";
 
         public override string ParameterDelimiter => ":";
         
@@ -76,7 +76,7 @@ namespace Data.Net
 
             sb.Clear();
 
-            return string.Format(Sql, metaData.TableName, columns, values, identityInserted);
+            return string.Format(InsertSql, metaData.TableName, columns, values, identityInserted);
         }
     }
 }

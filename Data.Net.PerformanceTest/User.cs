@@ -28,7 +28,7 @@
     [TableName("teams")]  //ORACLE
     public sealed class Teams
     {
-        [OracleSequence(SequenceName = "teams_seq")] //trigger with //[AutoIncrement]
+        [AutoIncrement(SequenceName = "teams_seq")] //trigger with //[AutoIncrement]
         public decimal Id { get; set; }
 
         public string FirstName { get; set; }

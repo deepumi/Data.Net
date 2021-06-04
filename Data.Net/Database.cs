@@ -364,7 +364,20 @@ namespace Data.Net
             
             return ExecuteNonQuery(sql, CommandType.Text, parameters);
         }
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="sql"></param>
+        /// <param name="whereClause"></param>
+        /// <param name="orderByClause"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="currentPage"></param>
+        /// <returns></returns>
+        public PaginationResult<TEntity> PagedQuery<TEntity>(string sql, string whereClause = default, string orderByClause = default, int pageSize = 10, int currentPage = 1) =>
+            _dbProvider.PagedQuery<TEntity>(this, sql, whereClause, orderByClause, pageSize, currentPage);
+
         /// <summary>
         /// 
         /// </summary>

@@ -1,16 +1,16 @@
-﻿using System;
+﻿//using System;
 
-namespace Data.Net
-{
-    /// <summary>
-    /// 
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public sealed class OracleSequenceAttribute : AutoIncrementAttribute
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public string SequenceName { get; set; }
-    }
-}
+//namespace Data.Net
+//{
+//    /// <summary>
+//    /// 
+//    /// </summary>
+//    [AttributeUsage(AttributeTargets.Property)]
+//    public sealed class OracleSequenceAttribute : AutoIncrementAttribute
+//    {
+//        /// <summary>
+//        /// 
+//        /// </summary>
+        
+//    }
+//}

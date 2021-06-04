@@ -2,7 +2,7 @@
 {
     public class StudentInsert
     {
-        [OracleSequence(SequenceName = OracleSequenceHelper.SequenceName)]
+        [AutoIncrement(SequenceName = OracleSequenceHelper.SequenceName)]
         public long Id { get; set; }
 
         public string Name { get; set; }

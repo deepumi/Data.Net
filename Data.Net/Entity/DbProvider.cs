@@ -18,5 +18,10 @@
         internal abstract bool Delete<TEntity>(TEntity entity, Database db) where TEntity : class;
 
         internal abstract TEntity Get<TEntity>(TEntity entity, Database db) where TEntity : class;
+
+        internal virtual PaginationResult<TEntity> PagedQuery<TEntity>(Database db, string sql, string whereClause, string orderByClause, int pageSize = 10, int currentPage = 1)
+        {
+            return default;
+        }
     }
 }

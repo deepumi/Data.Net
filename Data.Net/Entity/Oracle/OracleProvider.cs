@@ -42,5 +42,32 @@ namespace Data.Net
         internal override TEntity Update<TEntity>(TEntity entity, Database db) => _query.Update(entity, db);
 
         internal override TEntity Get<TEntity>(TEntity entity, Database db) => _query.Get(entity, db);
+
+        internal override PaginationResult<TEntity> PagedQuery<TEntity>(Database db, string sql, string whereClause, string orderByClause, int pageSize = 10, int currentPage = 1)
+        {
+            var pagedQuery = _query.PagedModel(whereClause, orderByClause, pageSize, currentPage);
+
+            const string countSql = "SELECT COUNT(*) FROM ({0} {1} {2})";
+
+            var scalarValue = db.ExecuteScalar(string.Format(countSql, sql, pagedQuery.WhereClause, pagedQuery.OrderByClause));
+
+            var recordCount = scalarValue != null ? Convert.ToInt32(scalarValue.ToString()) : 0;
+
+            if (recordCount <= 0) return null;
+
+            const string pagedSql = @"SELECT * 
+                                    FROM
+                                      (SELECT rownum AS rnum,a.*
+                                       FROM
+                                         ({0} {1} {2}) a
+                                       WHERE rownum <= {3})
+                                    WHERE rnum >= {4}";
+
+            var pagedSqlFormatted = string.Format(pagedSql, sql, pagedQuery.WhereClause, pagedQuery.OrderByClause, pagedQuery.EndRow.ToString(), pagedQuery.StartRow.ToString());
+
+            var result = db.Query<TEntity>(pagedSqlFormatted);
+
+            return new PaginationResult<TEntity>(result, new PaginationInfo(recordCount, pagedQuery.CurrentPage, pagedQuery.PageSize));
+        }
     }
 }

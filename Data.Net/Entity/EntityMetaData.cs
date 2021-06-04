@@ -67,8 +67,6 @@ namespace Data.Net
         {
             var autoIncrement = property.GetCustomAttribute<AutoIncrementAttribute>(false);
 
-            var sequence = autoIncrement as OracleSequenceAttribute;
-
             if (autoIncrement == null) return null;
 
             Action<object> autoIncrementSetter = default;
@@ -84,7 +82,7 @@ namespace Data.Net
                 autoIncrementSetter = b => property.SetValue(_entity, b);
             }
 
-            return new AutoIncrementInfo(columnName, sequence?.SequenceName, retrieve, autoIncrementSetter,
+            return new AutoIncrementInfo(columnName, autoIncrement?.SequenceName, retrieve, autoIncrementSetter,
                 property.PropertyType);
         }
     }
