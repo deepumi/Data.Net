@@ -10,12 +10,12 @@ namespace Data.Net.Console.Test
     {
         static void Main(string[] args)
         {
-            var conn = "Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(Host=172.16.0.150)(Port=1521)))(CONNECT_DATA=(SERVICE_NAME=cosqa)(SERVER = DEDICATED))));User Id=portalowner;Password=pmanager2001;";
+            var conn = "";
 
             try
             {
                 
-                var sq = new Database(new SqlConnection("Data Source=HD-FS8T403\\SQLEXPRESS;Initial Catalog=DataNet;Integrated Security=True"));
+                var sq = new Database(new SqlConnection("Data Source=SQLEXPRESS;Initial Catalog=DataNet;Integrated Security=True"));
                 var tes = sq.PagedQuery<Test>("SELECT * from Test",null,"ORDER BY Id DESC",10,3);
                 
                 
@@ -31,7 +31,7 @@ namespace Data.Net.Console.Test
                 ELSE Create_date
                 END DESC";
                 
-                var pageInfo = db.PagedQuery<ApiException>(@"SELECT * FROM PORTALOWNER.API_EXCEPTIONS", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
+                var pageInfo = db.PagedQuery<ApiException>(@"SELECT * From MyTable", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
                     orderByClause: orderBy, pageSize: 2, currentPage: 2);
 
                 // var student = db.Get(new AdminUser { AdminUserId = 109 });

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Data.Net.Console.Test
 {
-    [TableName("CAREER_BOT_ENTITIES_EXCEPTIONS")]
+    [TableName("")]
     public sealed class LogMessage
     {
         public string Message { get; set; }
