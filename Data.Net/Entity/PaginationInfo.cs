@@ -36,7 +36,7 @@ namespace Data.Net
         public PaginationInfo(int totalRecords, int currentPage, int pageSize)
         {
             TotalRecords = totalRecords;
-            CurrentPage = currentPage;
+            CurrentPage = currentPage <= 0 ? 1 : currentPage;
             PageSize = pageSize;
             TotalPages = (int)Math.Ceiling(TotalRecords / (double)PageSize);
         }

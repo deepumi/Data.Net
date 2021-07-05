@@ -40,6 +40,8 @@ namespace Data.Net
         internal override PaginationResult<TEntity> PagedQuery<TEntity>(Database db, string sql, string whereClause, string orderByClause,
             int pageSize = 10, int currentPage = 1)
         {
+            if (string.IsNullOrEmpty(orderByClause)) orderByClause = "ORDER BY (SELECT 0)"; //set default order.
+
             var pagedQuery = _query.PagedModel(whereClause, orderByClause, pageSize, currentPage);
 
             const string countSql = "SELECT COUNT(*) FROM ({0} {1}) as T";

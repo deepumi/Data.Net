@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Dynamic;
 using Oracle.ManagedDataAccess.Client;
@@ -16,7 +15,8 @@ namespace Data.Net.Console.Test
             {
                 
                 var sq = new Database(new SqlConnection("Data Source=SQLEXPRESS;Initial Catalog=DataNet;Integrated Security=True"));
-                var tes = sq.PagedQuery<Test>("SELECT * from Test",null,"ORDER BY Id DESC",10,3);
+
+                var tes = sq.PagedQuery<Test>("SELECT * from Test",null, null, 4,0);
                 
                 
                 Program p = new Program();
@@ -24,15 +24,15 @@ namespace Data.Net.Console.Test
                 var s = p.BuildPagingQueryPair("SELECT * FROM Test","Id","","Id");
                 
                 
-                using var db = new Database(new OracleConnection(conn));
+                using var db = new OracleConnection(conn);
 
                 var orderBy = @"CASE
                 WHEN modify_date IS NOT NULL AND modify_date > Create_date THEN modify_date
                 ELSE Create_date
                 END DESC";
                 
-                var pageInfo = db.PagedQuery<ApiException>(@"SELECT * From MyTable", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
-                    orderByClause: orderBy, pageSize: 2, currentPage: 2);
+                var pageInfo = db.PagedQuery<ApiException>(@"SELECT * From api_exceptions", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
+                    orderByClause: orderBy, pageSize: 10, currentPage: 1);
 
                 // var student = db.Get(new AdminUser { AdminUserId = 109 });
 

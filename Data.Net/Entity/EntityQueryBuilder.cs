@@ -163,7 +163,7 @@ namespace Data.Net
                 
             return new PagedSqlResult
             {
-                CurrentPage = pageIndex,
+                CurrentPage = currentPage,
                 PageSize = pageSize,
                 StartRow = startRow,
                 EndRow = endRow,
