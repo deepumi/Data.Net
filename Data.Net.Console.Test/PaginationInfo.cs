@@ -1,6 +1,6 @@
 ﻿namespace Data.Net.Console.Test
 {
-    public class PaginationInfo
+    public sealed class PaginationInfo
     {
         public int TotalRecords { get; }
 
