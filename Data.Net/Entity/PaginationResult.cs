@@ -13,7 +13,7 @@ namespace Data.Net
         /// </summary>
         /// <param name="result"></param>
         /// <param name="paginationInfo"></param>
-        public PaginationResult(List<TEntity> result, PaginationInfo paginationInfo)
+        public PaginationResult(IEnumerable<TEntity> result, PaginationInfo paginationInfo)
         {
             Entities = result;
             PaginationInfo = paginationInfo;
@@ -22,7 +22,7 @@ namespace Data.Net
         /// <summary>
         /// 
         /// </summary>
-        public List<TEntity> Entities { get; }
+        public IEnumerable<TEntity> Entities { get; }
 
         /// <summary>
         /// 

@@ -9,8 +9,6 @@ namespace Data.Net
 {
     internal sealed class CommandBuilder : IDisposable
     {
-        private readonly DataParameters _parameters;
-
         internal readonly DbCommand Command;
 
         //Sync constructor
@@ -39,17 +37,24 @@ namespace Data.Net
             }
 
             if (parameters == null) return;
-            
-            _parameters = parameters;
 
-            AddParam();
+            AddParam(parameters);
         }
 
         internal Task OpenAsync(CancellationToken token) => Command.Connection.OpenAsync(token);
 
-        private void AddParam()
+        private void AddParam(DataParameters parameters)
         {
-            foreach (var item in _parameters)
+            if (parameters.DbParameters?.Count > 0)
+            {
+                for(var i= 0; i < parameters.DbParameters.Count; i++)
+                {
+                    Command.Parameters.Add(parameters.DbParameters[i]);
+                }
+                return;
+            }
+
+            foreach (var item in parameters)
             {
                 switch (item)
                 {

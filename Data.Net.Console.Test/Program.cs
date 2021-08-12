@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
-using System.Dynamic;
+using MySql.Data.MySqlClient;
+using Npgsql;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Data.Net.Console.Test
@@ -9,33 +12,39 @@ namespace Data.Net.Console.Test
     {
         static void Main(string[] args)
         {
-            var conn = "";
-
             try
             {
-                
-                var sq = new Database(new SqlConnection("Data Source=SQLEXPRESS;Initial Catalog=DataNet;Integrated Security=True"));
+                using (var sql = new SqlConnection(""))
+                {
+                    using var dp = new List<SqlParameter>(2)
+                    {
+                       new SqlParameter("@PageIndex", "1"),
+                       new SqlParameter("@RecordCount",SqlDbType.Int) {Direction = ParameterDirection.Output}
+                    }.ToDataParameters();
 
-                var tes = sq.PagedQuery<Test>("SELECT * from Test",null, null, 4,0);
-                
-                
-                Program p = new Program();
-                
-                var s = p.BuildPagingQueryPair("SELECT * FROM Test","Id","","Id");
-                
-                
-                using var db = new OracleConnection(conn);
+                    using (var r = sql.ExecuteReader("GetLogs", CommandType.StoredProcedure, dp))
+                    {
+                        while (r.Read())
+                        {
+                            var x = r.GetString(1);
+                        }
+                    }
+                    //var dp = new DataParameters(1)
+                    //{
+                    //    { "@Email", "deepumi@gmail.com" }
+                    //};
 
-                var orderBy = @"CASE
-                WHEN modify_date IS NOT NULL AND modify_date > Create_date THEN modify_date
-                ELSE Create_date
-                END DESC";
-                
-                var pageInfo = db.PagedQuery<ApiException>(@"SELECT * From api_exceptions", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
-                    orderByClause: orderBy, pageSize: 10, currentPage: 1);
+                    //var tes = sql.PagedQuery<ExceptionLog>("SELECT * from ExceptionLog",
+                    //    whereClause: "Email = @Email AND Email != ''",
+                    //    parameters: dp,
+                    //    orderByClause: "ExceptionId ASC",
+                    //    currentPage: 0,
+                    //    pageSize: 10);
+
+                    var e = dp.OutputParameter.GetInt32("@RecordCount");
+                }
 
                 // var student = db.Get(new AdminUser { AdminUserId = 109 });
-
                 var message = new LogMessage
                 {
                     Message = "Test Message in QA",
@@ -49,95 +58,47 @@ namespace Data.Net.Console.Test
             {
                 System.Console.WriteLine(exp.ToString());
             }
-
         }
 
-        private string PrimaryKeyField;
-        private string TableName;
-        
-        private dynamic BuildPagingQueryPair(string sql = "", string primaryKeyField = "", string whereClause = "", string orderByClause = "", string columns = "*", int pageSize = 20,
-            int currentPage = 1)
+        private static void NpgsqlPagination()
         {
-            var countSQL = string.IsNullOrEmpty(sql) ? string.Format("SELECT COUNT({0}) FROM {1}", PrimaryKeyField, TableName)
-                : string.Format("SELECT COUNT({0}) FROM ({1}) AS PagedTable", primaryKeyField, sql);
-            var orderByClauseFragment = orderByClause;
-            if(string.IsNullOrEmpty(orderByClauseFragment))
-            {
-                orderByClauseFragment = string.IsNullOrEmpty(primaryKeyField) ? PrimaryKeyField : primaryKeyField;
-            }
-            var whereClauseFragment = ReadifyWhereClause(whereClause);
-            var query = string.Empty;
-            if(string.IsNullOrEmpty(sql))
-            {
-                query = string.Format("SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS Row, {0} FROM {2} {3}) AS Paged ", columns, orderByClauseFragment, TableName, 
-                    whereClauseFragment);
-            }
-            else
-            {
-                query = string.Format("SELECT {0} FROM (SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS Row, {0} FROM ({2}) AS PagedTable {3}) AS Paged ", columns, orderByClauseFragment, sql, 
-                    whereClauseFragment);
-            }
-            var pageStart = (currentPage - 1) * pageSize;
-            query += string.Format(" WHERE Row > {0} AND Row <={1}", pageStart, (pageStart + pageSize));
-            countSQL += whereClauseFragment;
-            dynamic toReturn = new ExpandoObject();
-            toReturn.MainQuery = query;
-            toReturn.CountQuery = countSQL;
-            return toReturn;
+            var ss = "Host=localhost;Username=postgres;Password=;Database=demoDb;Port=5432;";
+
+            using var pg = new NpgsqlConnection(ss);
+
+            var s = pg.PagedQuery<Test>("select * from users", pageSize: 2, currentPage: 5);
         }
-        
-        private string ReadifyWhereClause(string rawWhereClause)
+
+        private static void MySqlPagination()
         {
-            return ReadifyClause(rawWhereClause, "WHERE");
+            using var mysql = new MySqlConnection("");
+
+            var t = mysql.PagedQuery<Test>("SELECT * FROM `users`", currentPage: 5, pageSize: 2);
         }
 
-
-        /// <summary>
-        /// Readifies the orderby clause specified. If a non-empty/whitespace string is specified, it will make sure it's prefixed with " ORDER BY" including a prefix space.
-        /// </summary>
-        /// <param name="rawOrderByClause">The raw order by clause.</param>
-        /// <returns>
-        /// processed rawOrderByClause which will guaranteed contain " ORDER BY" including prefix space.
-        /// </returns>
-        private string ReadifyOrderByClause(string rawOrderByClause)
+        private void SqlPagination()
         {
-            return ReadifyClause(rawOrderByClause, "ORDER BY");
+            var sq = new Database(new SqlConnection("Data Source=SQLEXPRESS;Initial Catalog=DataNet;Integrated Security=True"));
+
+            var tes = sq.PagedQuery<Test>("SELECT * from Test", pageSize: 4, currentPage: 0);
         }
 
-
-        /// <summary>
-        /// Readifies the where clause specified. If a non-empty/whitespace string is specified, it will make sure it's prefixed with the specified operator including a prefix space.
-        /// </summary>
-        /// <param name="rawClause">The raw clause.</param>
-        /// <param name="op">The operator, e.g. "WHERE" or "ORDER BY".</param>
-        /// <returns>
-        /// processed rawClause which will guaranteed start with op including prefix space.
-        /// </returns>
-        private string ReadifyClause(string rawClause, string op)
+        private void OraclePagination()
         {
-            var toReturn = string.Empty;
-            if(rawClause == null)
-            {
-                return toReturn;
-            }
-            toReturn = rawClause.Trim();
-            if(!string.IsNullOrWhiteSpace(toReturn))
-            {
-                if(toReturn.StartsWith(op, StringComparison.OrdinalIgnoreCase))
-                {
-                    toReturn = " " + toReturn;
-                }
-                else
-                {
-                    toReturn = string.Format(" {0} {1}", op, toReturn);
-                }
-            }
-            return toReturn;
-        }
+            using var db = new OracleConnection("");
 
+            var orderBy = @"CASE
+                WHEN modify_date IS NOT NULL AND modify_date > Create_date THEN modify_date
+                ELSE Create_date
+                END DESC";
+
+            var pageInfo = db.PagedQuery<ApiException>(@"SELECT * From api_exceptions", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
+                orderByClause: orderBy, pageSize: 10, currentPage: 1);
+
+        }
     }
 
-    
+
     [TableName("API_EXCEPTIONS")]
     public class ApiException
     {
@@ -148,11 +109,20 @@ namespace Data.Net.Console.Test
         public DateTime CREATE_DATE { get; set; }
     }
 
+    [TableName("Users")]
     public class Test
     {
         [AutoIncrement]
         public int Id { get; set; }
-        
+
         public string Name { get; set; }
+    }
+
+    public class ExceptionLog
+    {
+        [AutoIncrement]
+        public int ExceptionId { get; set; }
+
+        public string ExceptionMessage { get; set; }
     }
 }

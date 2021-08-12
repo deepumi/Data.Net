@@ -37,8 +37,7 @@ namespace Data.Net
 
         internal override TEntity Get<TEntity>(TEntity entity, Database db) => _query.Get(entity, db);
 
-        internal override PaginationResult<TEntity> PagedQuery<TEntity>(Database db, string sql, string whereClause, string orderByClause,
-            int pageSize = 10, int currentPage = 1)
+        internal override PaginationResult<TEntity> PagedQuery<TEntity>(Database db, string sql, string whereClause, object parameters = null, string orderByClause = null, int currentPage = 1, int pageSize = 10)
         {
             if (string.IsNullOrEmpty(orderByClause)) orderByClause = "ORDER BY (SELECT 0)"; //set default order.
 
@@ -46,7 +45,7 @@ namespace Data.Net
 
             const string countSql = "SELECT COUNT(*) FROM ({0} {1}) as T";
 
-            var scalarValue = db.ExecuteScalar(string.Format(countSql, sql, pagedQuery.WhereClause));
+            var scalarValue = db.ExecuteScalar(string.Format(countSql, sql, pagedQuery.WhereClause), parameters: parameters);
 
             var recordCount = scalarValue != null ? Convert.ToInt32(scalarValue.ToString()) : 0;
 
@@ -61,7 +60,7 @@ namespace Data.Net
 
             var pagedSqlFormatted = string.Format(pagedSql, pagedQuery.OrderByClause, sql, pagedQuery.WhereClause, pagedQuery.StartRow.ToString(), pagedQuery.EndRow.ToString());
 
-            var result = db.Query<TEntity>(pagedSqlFormatted);
+            var result = db.Query<TEntity>(pagedSqlFormatted, parameters: parameters);
 
             return new PaginationResult<TEntity>(result, new PaginationInfo(recordCount, pagedQuery.CurrentPage, pagedQuery.PageSize));
         }

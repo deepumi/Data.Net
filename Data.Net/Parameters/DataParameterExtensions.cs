@@ -1,10 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 
 namespace Data.Net
 {
-    internal static class DataParameterExtensions
+    public static class DataParameterExtensions
     {
+        public static DataParameters ToDataParameters(this IEnumerable<IDbDataParameter> parameters)
+        {
+            if (parameters == null) return default;
+
+            return new DataParameters(parameters);
+        }
+
         internal static DataParameters ToDataParameters(this object parameters, string parameterDelimiter)
         {
             DataParameters dataParameters;
@@ -51,7 +59,11 @@ namespace Data.Net
 
                     return dataParameters;
 
-              default:
+                case IEnumerable<IDbDataParameter> kvp:
+ 
+                    return new DataParameters(kvp);
+
+                default:
 
                     var properties = TypeDescriptor.GetProperties(parameters);
 

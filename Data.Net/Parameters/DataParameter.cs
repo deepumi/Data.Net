@@ -9,11 +9,20 @@ namespace Data.Net
     /// <summary>
     /// Initializes a new <see cref="DataParameters" /> class
     /// </summary>
-    public sealed class DataParameters : IEnumerable<object>
+    public sealed class DataParameters : IEnumerable<object>, IDisposable
     {
         private const int DefaultCapacity = 4;
 
         private readonly List<object> _parameters;
+
+        private bool _disposed;
+
+        internal readonly IList<IDbDataParameter> DbParameters;
+
+        /// <summary>
+        /// Holds output or return command parameters name and values.
+        /// </summary>
+        public IOutputParameter OutputParameter { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataParameters"/> class that is empty and has the initial capacity as 4.
@@ -29,34 +38,19 @@ namespace Data.Net
             if (capacity <= 0) capacity = DefaultCapacity;
 
             _parameters = new List<object>(capacity);
+
+            OutputParameter = new OutputParameter(_parameters);
         }
 
         /// <summary>
-        /// Returns database output or return parameter to <see cref="IDbDataParameter"/>.  
+        /// 
         /// </summary>
-        /// <param name="index">Array index</param>
-        /// <returns></returns>
-        public IDbDataParameter this[int index]
+        /// <param name="parameters"></param>
+        public DataParameters(IEnumerable<IDbDataParameter> parameters)
         {
-            get
-            {
-                if (index < 0 || index > _parameters.Count - 1) return default;
-
-                return _parameters[index] switch
-                {
-                    Parameter p when IsOutPutOrReturnParameter(p.Direction) => p.DbParameter,
-                    IDbDataParameter dp when IsOutPutOrReturnParameter(dp.Direction) => dp,
-                    _ => default
-                };
-            }
+            DbParameters = new List<IDbDataParameter>(parameters);
+            OutputParameter = new OutputDbParameter(DbParameters);
         }
-
-        /// <summary>
-        /// Returns database output or return parameter to <see cref="IDbDataParameter"/>.
-        /// </summary>
-        /// <param name="name">Output parameter name</param>
-        /// <returns></returns>
-        public IDbDataParameter this[string name] => GetDbParameter(name);
 
         /// <summary>
         /// Add IDbDataParameter type object. <see cref="IDbDataParameter"/>
@@ -102,33 +96,7 @@ namespace Data.Net
         /// <typeparam name="T">Type of the parameter</typeparam>
         /// <param name="name">Name of the parameter</param>
         /// <returns></returns>
-        public T Value<T>(string name)
-        {
-            var parameter = GetDbParameter(name);
-
-            return parameter?.Value == null ? default : parameter.Value.ToValue<T>();
-        }
-        
-        private IDbDataParameter GetDbParameter(string name)
-        {
-            if (name == null) return default;
-
-            for (var i = _parameters.Count - 1; i >= 0; i--)
-            {
-                switch (_parameters[i])
-                {
-                    case Parameter p when IsOutPutOrReturnParameter(p.Direction) && 
-                                          string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase):
-                        return p.DbParameter;
-
-                    case IDbDataParameter dp when IsOutPutOrReturnParameter(dp.Direction) && 
-                                                  string.Equals(dp.ParameterName, name, StringComparison.OrdinalIgnoreCase):
-                        return dp;
-                }
-            }
- 
-            return default;
-        }
+        public T Value<T>(string name) => OutputParameter.Value<T>(name);
 
         /// <inheritdoc />
         /// <summary>
@@ -138,10 +106,20 @@ namespace Data.Net
         public IEnumerator<object> GetEnumerator() => _parameters.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-         
+
         private static void Throw(string parameter) => throw new ArgumentNullException(parameter);
-        
-        private static bool IsOutPutOrReturnParameter(ParameterDirection direction)
-            => direction != 0 && direction != ParameterDirection.Input;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _parameters?.Clear();
+                DbParameters?.Clear();
+                _disposed = true;
+            }
+        }
     }
 }

@@ -162,12 +162,13 @@ namespace Data.Net
         /// <param name="conn"></param>
         /// <param name="sql"></param>
         /// <param name="whereClause"></param>
+        /// <param name="parameters"></param>
         /// <param name="orderByClause"></param>
-        /// <param name="pageSize"></param>
         /// <param name="currentPage"></param>
+        /// <param name="pageSize"></param>
         /// <returns></returns>
-        public static PaginationResult<TEntity> PagedQuery<TEntity>(this IDbConnection conn, string sql, string whereClause = default, 
-            string orderByClause = default, int pageSize = 10, int currentPage = 1) => new Database(conn).PagedQuery<TEntity>(sql, whereClause, orderByClause, pageSize, currentPage);
+        public static PaginationResult<TEntity> PagedQuery<TEntity>(this IDbConnection conn, string sql, string whereClause = default, object parameters = null,
+            string orderByClause = default, int currentPage = 1, int pageSize = 10) => new Database(conn).PagedQuery<TEntity>(sql, whereClause, parameters, orderByClause, currentPage, pageSize);
 
         /// <summary>
         /// 

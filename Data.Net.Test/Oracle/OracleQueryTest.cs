@@ -92,7 +92,7 @@ namespace Data.Net.Test.Oracle
 
                 connection.ExecuteNonQuery($"{procedureName}", CommandType.StoredProcedure, dp);
 
-                var id = dp["pId"]?.Value;
+                var id = dp.OutputParameter["pId"]?.Value;
 
                 Assert.True(id != null && id.ToString() == "1");
 

@@ -371,12 +371,13 @@ namespace Data.Net
         /// <typeparam name="TEntity"></typeparam>
         /// <param name="sql"></param>
         /// <param name="whereClause"></param>
+        /// <param name="parameters"></param>
         /// <param name="orderByClause"></param>
-        /// <param name="pageSize"></param>
         /// <param name="currentPage"></param>
+        /// <param name="pageSize"></param>
         /// <returns></returns>
-        public PaginationResult<TEntity> PagedQuery<TEntity>(string sql, string whereClause = default, string orderByClause = default, int pageSize = 10, int currentPage = 1) =>
-            _dbProvider.PagedQuery<TEntity>(this, sql, whereClause, orderByClause, pageSize, currentPage);
+        public PaginationResult<TEntity> PagedQuery<TEntity>(string sql, string whereClause = default, object parameters = null, string orderByClause = default, int currentPage = 1, int pageSize = 10) =>
+            _dbProvider.PagedQuery<TEntity>(this, sql, whereClause, parameters, orderByClause, currentPage, pageSize);
 
         /// <summary>
         /// 

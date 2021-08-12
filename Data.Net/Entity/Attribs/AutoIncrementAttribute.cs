@@ -6,7 +6,7 @@ namespace Data.Net
     /// 
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class AutoIncrementAttribute : Attribute
+    public sealed class AutoIncrementAttribute : Attribute
     {
         /// <summary>
         /// 
