@@ -62,9 +62,7 @@ namespace Data.Net.Console.Test
 
         private static void NpgsqlPagination()
         {
-            var ss = "Host=localhost;Username=postgres;Password=;Database=demoDb;Port=5432;";
-
-            using var pg = new NpgsqlConnection(ss);
+            using var pg = new NpgsqlConnection("");
 
             var s = pg.PagedQuery<Test>("select * from users", pageSize: 2, currentPage: 5);
         }
