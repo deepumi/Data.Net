@@ -3,6 +3,9 @@ using System.Data;
 
 namespace Data.Net
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public abstract class BaseOutputParameter : IOutputParameter
     {
         /// <summary>
@@ -12,6 +15,10 @@ namespace Data.Net
         /// <returns></returns>
         public IDbDataParameter this[string name] => GetDbParameter(name);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
         public abstract IDbDataParameter this[int index] { get; }
 
         /// <summary>
@@ -45,11 +52,10 @@ namespace Data.Net
             var value = GetDbParameter(name)?.Value?.ToString();
 
             return value != null &&
-                   (value.IndexOf("true", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   (value.Equals("true", StringComparison.OrdinalIgnoreCase) ||
                    value == "1" ||
-                   value.IndexOf("t", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   value.IndexOf("yes", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                   value.IndexOf("y", StringComparison.OrdinalIgnoreCase) >= 0);
+                   value.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                   value.Equals("y", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -163,7 +169,7 @@ namespace Data.Net
         /// </summary>
         /// <param name="name">Name of the output parameter</param>
         /// <returns></returns>
-        public object GetValue(string name) => GetDbParameter(name)?.Value;
+        public object GetObject(string name) => GetDbParameter(name)?.Value;
 
         /// <summary>
         /// 

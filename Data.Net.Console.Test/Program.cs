@@ -12,14 +12,19 @@ namespace Data.Net.Console.Test
     {
         static void Main(string[] args)
         {
+
+        }
+
+        void Test()
+        {
             try
             {
                 using (var sql = new SqlConnection(""))
                 {
                     using var dp = new List<SqlParameter>(2)
                     {
-                       new SqlParameter("@PageIndex", "1"),
-                       new SqlParameter("@RecordCount",SqlDbType.Int) {Direction = ParameterDirection.Output}
+                        new SqlParameter("@PageIndex", "1"),
+                        new SqlParameter("@RecordCount",SqlDbType.Int) {Direction = ParameterDirection.Output}
                     }.ToDataParameters();
 
                     using (var r = sql.ExecuteReader("GetLogs", CommandType.StoredProcedure, dp))
@@ -90,7 +95,7 @@ namespace Data.Net.Console.Test
                 ELSE Create_date
                 END DESC";
 
-            var pageInfo = db.PagedQuery<ApiException>(@"SELECT * From api_exceptions", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
+            var pageInfo = db.PagedQuery<ApiException>(@"SELECT * From ApiException", whereClause: "UPPER(STATUS) = UPPER('ACTIVE')",
                 orderByClause: orderBy, pageSize: 10, currentPage: 1);
 
         }

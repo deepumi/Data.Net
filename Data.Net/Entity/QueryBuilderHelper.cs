@@ -10,7 +10,7 @@ namespace Data.Net
 
             if (result == null) return entity;
 
-            return db.QuerySingle<TEntity>(result.Query, CommandType.Text, result.DataParameters);
+            return db.QuerySingle<TEntity>(result.Query, CommandType.Text, result.DataParameters, CommandBehavior.Default);
         }
         
         internal static TEntity Update<TEntity>(this IEntityQueryBuilder query, TEntity entity, Database db)

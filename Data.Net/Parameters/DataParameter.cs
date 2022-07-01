@@ -5,7 +5,6 @@ using System.Data;
 
 namespace Data.Net
 {
-    /// <inheritdoc />
     /// <summary>
     /// Initializes a new <see cref="DataParameters" /> class
     /// </summary>
@@ -30,7 +29,7 @@ namespace Data.Net
         public DataParameters() : this(DefaultCapacity) { }
 
         /// <summary>
-        /// Intialize a new instance of the <see cref="DataParameters"/> class that is empty and has the specified initial capacity.
+        /// Initialize a new instance of the <see cref="DataParameters"/> class that is empty and has the specified initial capacity.
         /// </summary>
         /// <param name="capacity">The number of required parameters can initially store.</param>
         public DataParameters(int capacity)
@@ -58,7 +57,7 @@ namespace Data.Net
         /// <param name="parameter"></param>
         public void Add(IDbDataParameter parameter)
         {
-            if (parameter == null) Throw(nameof(parameter));
+            if (parameter == null) ThrowHelper.Throw(nameof(parameter));
 
             _parameters.Add(parameter);
         }
@@ -70,7 +69,7 @@ namespace Data.Net
         /// <param name="value">Value of the parameter</param>
         public void Add(string name, object value)
         {
-            if (name == null) Throw(nameof(name));
+            if (name == null) ThrowHelper.Throw(nameof(name));
 
             _parameters.Add(new Parameter(name, value));
         }
@@ -82,10 +81,10 @@ namespace Data.Net
         /// <param name="direction">Parameter direction one of the value of <see cref="ParameterDirection"/></param>
         /// <param name="dbType">Parameter type <see cref="DbType"/></param>
         /// <param name="size">Parameter size. Datatype size.</param>
-        public void Add(string name, ParameterDirection direction = ParameterDirection.Output,
+        public void AddOutPutParameter(string name, ParameterDirection direction = ParameterDirection.Output,
             DbType dbType = DbType.Int32, int size = 0)
         {
-            if (name == null) Throw(nameof(name));
+            if (name == null) ThrowHelper.Throw(nameof(name));
 
             _parameters.Add(new Parameter(name, direction, dbType, size));
         }
@@ -107,19 +106,16 @@ namespace Data.Net
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private static void Throw(string parameter) => throw new ArgumentNullException(parameter);
-
         /// <summary>
         /// 
         /// </summary>
         public void Dispose()
         {
-            if (!_disposed)
-            {
-                _parameters?.Clear();
-                DbParameters?.Clear();
-                _disposed = true;
-            }
+            if (_disposed) return;
+            
+            _parameters?.Clear();
+            DbParameters?.Clear();
+            _disposed = true;
         }
     }
 }

@@ -73,7 +73,8 @@ namespace Data.Net.Test.SqlServer
 
             _database.ExecuteNonQuery(proc); //create temp procedure!
 
-            var dataParameters = new DataParameters { { "@Name", "Jon" }, { "@Gender", "Male" }, { "@Age", 25 }, "@StudentId" };
+            var dataParameters = new DataParameters { { "@Name", "Jon" }, { "@Gender", "Male" }, { "@Age", 25 } };
+            dataParameters.AddOutPutParameter("@StudentId");
 
             var result = _database.ExecuteNonQuery("#InsertStudent", CommandType.StoredProcedure, dataParameters);
 

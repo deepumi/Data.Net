@@ -80,9 +80,9 @@ namespace Data.Net.Test.SqlServer
                 {"@Name", "Jon"},
                 {"@Gender", "Male"},
                 {"@Age", 25},
-                {"@Id", 1},
-                "@ReturnValue"
+                {"@Id", 1}
             };
+            dataParameters.AddOutPutParameter("@ReturnValue");
 
             var result = _database.ExecuteNonQuery("UpdateStudent", CommandType.StoredProcedure, dataParameters);
 

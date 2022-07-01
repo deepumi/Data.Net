@@ -63,9 +63,9 @@ namespace Data.Net.Test.MySql
 
             var dataParameters = new DataParameters
             {
-                {"@Id", 1},
-                {"@ReturnValue", ParameterDirection.Output, DbType.String, 15}
+                {"@Id", 1 }
             };
+            dataParameters.AddOutPutParameter("@ReturnValue", ParameterDirection.Output, DbType.String, 15);
 
             _database.ExecuteNonQuery("DeleteStudent", CommandType.StoredProcedure, dataParameters);
 

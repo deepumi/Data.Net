@@ -14,7 +14,7 @@ namespace Data.Net
             var dataParameters = CreateDataParameters(metaData);
 
             if (dataParameters != null && metaData.AutoIncrementInfo != null && !string.IsNullOrEmpty(metaData.AutoIncrementInfo.ColumnName))
-                dataParameters.Add(string.Concat(ParameterDelimiter, metaData.AutoIncrementInfo.ColumnName), ParameterDirection.Output, metaData.AutoIncrementInfo.PropertyType);
+                dataParameters.AddOutPutParameter(string.Concat(ParameterDelimiter, metaData.AutoIncrementInfo.ColumnName), ParameterDirection.Output, metaData.AutoIncrementInfo.PropertyType);
 
             return new SqlResult(CreateInsertColumnNames(metaData), dataParameters);
         }

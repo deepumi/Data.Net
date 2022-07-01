@@ -46,7 +46,7 @@ namespace Data.Net
                 var columnProperty = properties[i].GetCustomAttribute<ColumnAttribute>(false);
 
                 if (properties[i].GetSetMethod() == null ||
-                    columnProperty != null && columnProperty.IgnoreColumn) continue;
+                    columnProperty is { IgnoreColumn: true }) continue;
 
                 var columnName = columnProperty?.Name ?? properties[i].Name;
 
@@ -82,7 +82,7 @@ namespace Data.Net
                 autoIncrementSetter = b => property.SetValue(_entity, b);
             }
 
-            return new AutoIncrementInfo(columnName, autoIncrement?.SequenceName, retrieve, autoIncrementSetter,
+            return new AutoIncrementInfo(columnName, autoIncrement.SequenceName, retrieve, autoIncrementSetter,
                 property.PropertyType);
         }
     }

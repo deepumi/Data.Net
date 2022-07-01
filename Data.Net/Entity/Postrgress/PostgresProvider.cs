@@ -58,7 +58,7 @@ namespace Data.Net
                                                      LIMIT {3} OFFSET {4}
                                                 ) T";
 
-            var pagedSqlFormatted = string.Format(pagedSql, sql, pagedQuery.WhereClause, pagedQuery.OrderByClause, pagedQuery.PageSize, offset.ToString());
+            var pagedSqlFormatted = string.Format(pagedSql, sql, pagedQuery.WhereClause, pagedQuery.OrderByClause, pagedQuery.PageSize.ToString(), offset.ToString());
 
             var result = db.Query<TEntity>(pagedSqlFormatted, parameters: parameters);
 

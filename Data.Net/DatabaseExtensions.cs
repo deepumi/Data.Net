@@ -90,7 +90,7 @@ namespace Data.Net
         /// <returns></returns>
         public static IDataReader ExecuteReader(this IDbConnection conn, string sql,
             CommandType commandType = CommandType.Text,
-            object parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection) =>
+            object parameters = null, CommandBehavior behavior = CommandBehavior.Default) =>
             new Database(conn).ExecuteReader(sql, commandType, parameters, behavior);
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Data.Net
         /// <returns></returns>
         public static Task<IDataReader> ExecuteReaderAsync(this IDbConnection conn, string sql,
             CommandType commandType = CommandType.Text,
-            object parameters = null, CommandBehavior behavior = CommandBehavior.CloseConnection,
+            object parameters = null, CommandBehavior behavior = CommandBehavior.Default,
             CancellationToken token = default) =>
             new Database(conn).ExecuteReaderAsync(sql, commandType, parameters, behavior, token);
 
@@ -121,7 +121,7 @@ namespace Data.Net
         /// <returns></returns>
         public static List<T> Query<T>(this IDbConnection conn, string sql, CommandType commandType = CommandType.Text,
             object parameters = null,
-            CommandBehavior behavior = CommandBehavior.CloseConnection) =>
+            CommandBehavior behavior = CommandBehavior.Default) =>
             new Database(conn).Query<T>(sql, commandType, parameters, behavior);
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Data.Net
         /// <returns></returns>
         public static T QuerySingle<T>(this IDbConnection conn, string sql, CommandType commandType = CommandType.Text,
             object parameters = null,
-            CommandBehavior behavior = CommandBehavior.CloseConnection) =>
+            CommandBehavior behavior = CommandBehavior.Default) =>
             new Database(conn).QuerySingle<T>(sql, commandType, parameters, behavior);
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Data.Net
         /// <returns></returns>
         public static Task<T> QuerySingleAsync<T>(this IDbConnection conn, string sql,
             CommandType commandType = CommandType.Text, object parameters = null,
-            CommandBehavior behavior = CommandBehavior.CloseConnection, CancellationToken token = default) =>
+            CommandBehavior behavior = CommandBehavior.Default, CancellationToken token = default) =>
             new Database(conn).QuerySingleAsync<T>(sql, commandType, parameters, behavior, token);
 
         /// <summary>

@@ -6,7 +6,7 @@ namespace Data.Net
 {
     internal static class DbTypeHelper
     {
-        private static readonly Dictionary<Type, DbType> _types = new Dictionary<Type, DbType>(9)
+        private static readonly Dictionary<Type, DbType> _types = new(9)
         {
             [typeof(short)] = DbType.Int16,
             [typeof(ushort)] = DbType.UInt16,

@@ -16,15 +16,12 @@
 
         internal abstract TEntity Get<TEntity>(TEntity entity, Database db) where TEntity : class;
 
-        internal virtual PaginationResult<TEntity> PagedQuery<TEntity>(Database db,
+        internal abstract PaginationResult<TEntity> PagedQuery<TEntity>(Database db,
             string sql,
             string whereClause,
             object parameters = null,
             string orderByClause = null,
             int currentPage = 1,
-            int pageSize = 10)
-        {
-            return default;
-        }
+            int pageSize = 10);
     }
 }

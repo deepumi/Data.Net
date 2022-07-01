@@ -49,7 +49,7 @@ namespace Data.Net
             sb.Append(" WHERE ");
 
             if (string.IsNullOrEmpty(columnName) || keyValue == null)
-                throw new Exception("Update failed, cannot obtain Key or Auto Increment column or value");
+                ThrowHelper.ThrowException("Update failed, cannot obtain Key or Auto Increment column or value");
 
             sb.Append(columnName);
             sb.Append("=");
@@ -88,7 +88,7 @@ namespace Data.Net
             }
 
             if (dp == null)
-                throw new Exception("Unable to perform DELETE operation. Cannot obtain Key or Auto Increment column or value");
+                ThrowHelper.ThrowException("Unable to perform DELETE operation. Cannot obtain Key or Auto Increment column or value");
 
             return new SqlResult(sb.ToString(), dp);
         }
@@ -120,7 +120,7 @@ namespace Data.Net
             }
 
             if (dp == null)
-                throw new Exception("Unable to perform SELECT operation. Cannot obtain Key or Auto Increment column or value");
+                ThrowHelper.ThrowException("Unable to perform SELECT operation. Cannot obtain Key or Auto Increment column or value");
 
             return new SqlResult(sb.ToString(), dp);
         }

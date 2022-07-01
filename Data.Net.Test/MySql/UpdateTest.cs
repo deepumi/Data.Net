@@ -71,8 +71,8 @@ namespace Data.Net.Test.MySql
                 {"@Gender", "Male"},
                 {"@Age", 25},
                 {"@Id", 1},
-                "@ReturnValue"
             };
+            dbParameters.AddOutPutParameter("@ReturnValue");
 
             var result = _database.ExecuteNonQuery("UpdateStudent", CommandType.StoredProcedure, dbParameters);
 

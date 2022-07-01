@@ -21,12 +21,11 @@ namespace Data.Net
 
                 return _parameters[index] switch
                 {
-                    IDbDataParameter dp when IsOutPutOrReturnParameter(dp.Direction) => dp,
+                    { } dp when IsOutPutOrReturnParameter(dp.Direction) => dp,
                     _ => default
                 };
             }
         }
-
 
         protected override IDbDataParameter GetDbParameter(string name)
         {

@@ -4,16 +4,24 @@ using System.Data;
 
 namespace Data.Net
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class DataParameterExtensions
     {
-        public static DataParameters ToDataParameters(this IEnumerable<IDbDataParameter> parameters)
+        /// <summary>
+        /// Convert <see cref="IDbDataParameter"/> to DataParameters.
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public static DataParameters ToDbParameters(this IEnumerable<IDbDataParameter> parameters)
         {
             if (parameters == null) return default;
 
             return new DataParameters(parameters);
         }
 
-        internal static DataParameters ToDataParameters(this object parameters, string parameterDelimiter)
+        internal static DataParameters ToDbParameters(this object parameters, string parameterDelimiter)
         {
             DataParameters dataParameters;
 
@@ -31,7 +39,7 @@ namespace Data.Net
 
                     foreach (var item in dict)
                     {
-                        dataParameters.Add(AddParameterDelimiter(item.Key, parameterDelimiter), item.Value);
+                        dataParameters.Add(AddDelimiter(item.Key, parameterDelimiter), item.Value);
                     }
 
                     return dataParameters;
@@ -44,7 +52,7 @@ namespace Data.Net
 
                         for (var i = 0; i < list.Count; i++)
                         {
-                            dataParameters.Add(AddParameterDelimiter(list[i].Key, parameterDelimiter), list[i].Value);
+                            dataParameters.Add(AddDelimiter(list[i].Key, parameterDelimiter), list[i].Value);
                         }
 
                         return dataParameters;
@@ -54,7 +62,7 @@ namespace Data.Net
 
                     foreach (var item in kvp)
                     {
-                        dataParameters.Add(AddParameterDelimiter(item.Key, parameterDelimiter), item.Value);
+                        dataParameters.Add(AddDelimiter(item.Key, parameterDelimiter), item.Value);
                     }
 
                     return dataParameters;
@@ -73,14 +81,14 @@ namespace Data.Net
                     {
                         var obj = properties[i].GetValue(parameters);
 
-                        dataParameters.Add(AddParameterDelimiter(properties[i].Name, parameterDelimiter), obj);
+                        dataParameters.Add(AddDelimiter(properties[i].Name, parameterDelimiter), obj);
                     }
 
                     return dataParameters;
             }
         }
 
-        private static string AddParameterDelimiter(string key, string parameterDelimiter)
+        private static string AddDelimiter(string key, string parameterDelimiter)
         {
             if (key == null) return string.Empty;
 
