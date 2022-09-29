@@ -110,7 +110,7 @@ namespace Data.Net
             new Database(conn).ExecuteReaderAsync(sql, commandType, parameters, behavior, token);
 
         /// <summary>
-        /// Execute a Transact-SQL statement and return a collection of <see cref="List{T}" />
+        /// Execute a Transact-SQL statement and returns a collection of <see cref="List{T}" />
         /// </summary>
         /// <typeparam name="T">The return object type</typeparam>
         /// <param name="conn"></param>

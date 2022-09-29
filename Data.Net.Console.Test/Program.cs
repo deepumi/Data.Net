@@ -25,7 +25,7 @@ namespace Data.Net.Console.Test
                     {
                         new SqlParameter("@PageIndex", "1"),
                         new SqlParameter("@RecordCount",SqlDbType.Int) {Direction = ParameterDirection.Output}
-                    }.ToDataParameters();
+                    }.ToDbParameters();
 
                     using (var r = sql.ExecuteReader("GetLogs", CommandType.StoredProcedure, dp))
                     {
@@ -34,17 +34,18 @@ namespace Data.Net.Console.Test
                             var x = r.GetString(1);
                         }
                     }
-                    //var dp = new DataParameters(1)
-                    //{
-                    //    { "@Email", "deepumi@gmail.com" }
-                    //};
+                    
+                    var dp1 = new DataParameters(1)
+                    {
+                        { "@Email", "jon@gmail.com" }
+                    };
 
-                    //var tes = sql.PagedQuery<ExceptionLog>("SELECT * from ExceptionLog",
-                    //    whereClause: "Email = @Email AND Email != ''",
-                    //    parameters: dp,
-                    //    orderByClause: "ExceptionId ASC",
-                    //    currentPage: 0,
-                    //    pageSize: 10);
+                    var tes = sql.PagedQuery<ExceptionLog>("SELECT * from ExceptionLog",
+                        whereClause: "Email = @Email AND Email != ''",
+                        parameters: dp1,
+                        orderByClause: "ExceptionId ASC",
+                        currentPage: 0,
+                        pageSize: 10);
 
                     var e = dp.OutputParameter.GetInt32("@RecordCount");
                 }

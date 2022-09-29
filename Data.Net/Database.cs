@@ -348,7 +348,7 @@ namespace Data.Net
             _dbProvider.PagedQuery<TEntity>(this, sql, whereClause, parameters, orderByClause, currentPage, pageSize);
 
         /// <summary>
-        /// Create a transaction
+        /// Create a transaction with the specified IsolationLevel
         /// </summary>
         /// <param name="isolationLevel">One of the IsolationLevel type of <see cref="IsolationLevel" /></param>
         public void StartTransaction(IsolationLevel isolationLevel = IsolationLevel.Unspecified)
@@ -359,17 +359,17 @@ namespace Data.Net
         }
 
         /// <summary>
-        /// Commit a transaction
+        /// Commits the db transaction
         /// </summary>
         public void CommitTransaction() => _transaction?.Commit();
 
         /// <summary>
-        /// Rollback a transaction
+        /// Rolls back a transaction
         /// </summary>
         public void RollbackTransaction() => _transaction?.Rollback();
 
         /// <summary>
-        /// Close IDbConnection.
+        /// Closes the db connection.
         /// </summary>
         public void Close()
         {
