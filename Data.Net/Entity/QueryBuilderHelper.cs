@@ -8,9 +8,7 @@ internal static class QueryBuilderHelper
     {
         var result = query.SelectQuery(new EntityMetaData(entity));
 
-        if (result == null) return entity;
-
-        return db.QuerySingle<TEntity>(result.Query, CommandType.Text, result.DataParameters, CommandBehavior.Default);
+        return result == null ? entity : db.QuerySingle<TEntity>(result.Query, CommandType.Text, result.DataParameters, CommandBehavior.Default);
     }
         
     internal static TEntity Update<TEntity>(this IEntityQueryBuilder query, TEntity entity, Database db)

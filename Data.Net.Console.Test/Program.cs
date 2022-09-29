@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text;
 using MySql.Data.MySqlClient;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
@@ -10,9 +11,91 @@ namespace Data.Net.Console.Test
 {
     class Program
     {
+        private static string AddDelimiter(string key, char parameterDelimiter)
+        {
+            if (key == null) return string.Empty;
+
+            return key[0] >= 65 && key[0] <= 90 // A-Z
+                   || key[0] >= 97 && key[0] <= 122 // a-z
+                ? parameterDelimiter + key
+                : key;
+        }
+
         static void Main(string[] args)
         {
+            var s1 = AddDelimiter("SomeKye", '@');
 
+            var sb = new StringBuilder();
+
+            CreateColumnValues(sb, new List<string>
+            {
+                "Column1",
+                "Column2",
+                "Column3"
+            }, false);
+
+            var f = sb.ToString();
+
+            sb.Clear();
+
+            CreateColumnValues1(sb, new List<string>
+            {
+                "Column1",
+                "Column2",
+                "Column3"
+            }, false);
+
+            var s = sb.ToString();
+        }
+
+        private static void CreateColumnValues1(StringBuilder sb, List<string> metaData, bool isAutoIncrement)
+        {
+            sb.Append(" VALUES (");
+
+            bool first = true;
+
+            for (var i = 0; i < metaData.Count; i++)
+            {
+                if (isAutoIncrement)
+                {
+                    isAutoIncrement = false;
+                    continue;
+
+                }
+
+                sb.Append(first ? "" : ',');
+                sb.Append("@");
+                sb.Append(metaData[i]);
+
+                first = false;
+            }
+
+            sb.Append(") ");
+        }
+
+        private static void CreateColumnValues(StringBuilder sb, List<string> metaData, bool isAutoIncrement)
+        {
+            sb.Append(" VALUES (");
+
+            var first = true;
+
+            for (var i = 0; i < metaData.Count; i++)
+            {
+                if (isAutoIncrement)
+                {
+                    isAutoIncrement = false;
+                    continue;
+
+                }
+
+                sb.Append(first ? "" : ',');
+                sb.Append("@");
+                sb.Append(metaData[i]);
+
+                first = false;
+            }
+
+            sb.Append(") ");
         }
 
         void Test()

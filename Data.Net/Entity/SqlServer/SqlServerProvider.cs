@@ -7,7 +7,7 @@ internal sealed class SqlServerProvider : DbProvider
 {
     private readonly IEntityQueryBuilder _query;
 
-    public SqlServerProvider(IEntityQueryBuilder query) : base(query.ParameterDelimiter) => _query = query;
+    internal SqlServerProvider(IEntityQueryBuilder query) : base(query.ParameterDelimiter) => _query = query;
 
     internal override bool Delete<TEntity>(TEntity entity, Database db) => _query.Delete(entity, db);
 

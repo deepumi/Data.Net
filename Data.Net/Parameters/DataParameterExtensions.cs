@@ -16,12 +16,10 @@ public static class DataParameterExtensions
     /// <returns></returns>
     public static DataParameters ToDbParameters(this IEnumerable<IDbDataParameter> parameters)
     {
-        if (parameters == null) return default;
-
-        return new DataParameters(parameters);
+        return parameters == null ? default : new DataParameters(parameters);
     }
 
-    internal static DataParameters ToDbParameters(this object parameters, string parameterDelimiter)
+    internal static DataParameters ToDbParameters(this object parameters, char parameterDelimiter)
     {
         DataParameters dataParameters;
 
@@ -68,7 +66,7 @@ public static class DataParameterExtensions
                 return dataParameters;
 
             case IEnumerable<IDbDataParameter> kvp:
- 
+
                 return new DataParameters(kvp);
 
             default:
@@ -88,7 +86,7 @@ public static class DataParameterExtensions
         }
     }
 
-    private static string AddDelimiter(string key, string parameterDelimiter)
+    private static string AddDelimiter(string key, char parameterDelimiter)
     {
         if (key == null) return string.Empty;
 

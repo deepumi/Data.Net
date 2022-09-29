@@ -5,7 +5,7 @@ namespace Data.Net;
 
 internal abstract class EntityQueryBuilder : IEntityQueryBuilder
 {
-    public abstract string ParameterDelimiter { get; }
+    public abstract char ParameterDelimiter { get; }
 
     protected internal EntityQueryBuilder() { }
 
@@ -15,7 +15,7 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
     {
         var sb = new StringBuilder("UPDATE " + metaData.TableName + " SET ");
 
-        var comma = string.Empty;
+        var first = true;
 
         object keyValue = default;
 
@@ -31,7 +31,7 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
                 continue;
             }
 
-            sb.Append(comma);
+            sb.Append(first ? "" : ',');
 
             sb.Append(' ');
 
@@ -43,7 +43,7 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
 
             sb.Append(metaData.PropertiesList[i].Name);
 
-            comma = ",";
+            first = false;
         }
 
         sb.Append(" WHERE ");
@@ -52,7 +52,7 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
             ThrowHelper.ThrowException("Update failed, cannot obtain Key or Auto Increment column or value");
 
         sb.Append(columnName);
-        sb.Append("=");
+        sb.Append('=');
         sb.Append(ParameterDelimiter);
         sb.Append(columnName);
 
@@ -67,24 +67,22 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
 
         for (var i = 0; i < metaData.PropertiesList.Count; i++)
         {
-            if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name) ||
-                string.Equals(metaData.KeyInfo,
-                    metaData.PropertiesList[i].Name, StringComparison.OrdinalIgnoreCase))
+            if (!metaData.IsAutoIncrement(metaData.PropertiesList[i].Name) && !string.Equals(metaData.KeyInfo,
+                    metaData.PropertiesList[i].Name, StringComparison.OrdinalIgnoreCase)) continue;
+            
+            dp = new DataParameters(1)
             {
-                dp = new DataParameters(1)
-                {
-                    {metaData.PropertiesList[i].Name, metaData.PropertiesList[i].Value}
-                };
+                {metaData.PropertiesList[i].Name, metaData.PropertiesList[i].Value}
+            };
 
-                sb.Append(" WHERE ");
+            sb.Append(" WHERE ");
 
-                sb.Append(metaData.PropertiesList[i].Name);
-                sb.Append("=");
-                sb.Append(ParameterDelimiter);
-                sb.Append(metaData.PropertiesList[i].Name);
+            sb.Append(metaData.PropertiesList[i].Name);
+            sb.Append('=');
+            sb.Append(ParameterDelimiter);
+            sb.Append(metaData.PropertiesList[i].Name);
 
-                break;
-            }
+            break;
         }
 
         if (dp == null)
@@ -101,22 +99,21 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
 
         for (var i = 0; i < metaData.PropertiesList.Count; i++)
         {
-            if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name) || string.Equals(metaData.KeyInfo,
-                    metaData.PropertiesList[i].Name, StringComparison.OrdinalIgnoreCase))
+            if (!metaData.IsAutoIncrement(metaData.PropertiesList[i].Name) && !string.Equals(metaData.KeyInfo,
+                    metaData.PropertiesList[i].Name, StringComparison.OrdinalIgnoreCase)) continue;
+
+            dp = new DataParameters(1)
             {
-                dp = new DataParameters(1)
-                {
-                    { metaData.PropertiesList[i].Name, metaData.PropertiesList[i].Value }
-                };
+                { metaData.PropertiesList[i].Name, metaData.PropertiesList[i].Value }
+            };
 
-                sb.Append("  WHERE ");
-                sb.Append(metaData.PropertiesList[i].Name);
-                sb.Append("=");
-                sb.Append(ParameterDelimiter);
-                sb.Append(metaData.PropertiesList[i].Name);
+            sb.Append("  WHERE ");
+            sb.Append(metaData.PropertiesList[i].Name);
+            sb.Append('=');
+            sb.Append(ParameterDelimiter);
+            sb.Append(metaData.PropertiesList[i].Name);
 
-                break;
-            }
+            break;
         }
 
         if (dp == null)
@@ -144,9 +141,9 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
         var pageIndex = currentPage;
 
         if (pageIndex <= 0) pageIndex = 1;
-            
+
         pageIndex -= 1;
-            
+
         if (pageSize <= 0) pageSize = 10;
 
         var startRow = (pageIndex * pageSize) + 1;
@@ -157,10 +154,10 @@ internal abstract class EntityQueryBuilder : IEntityQueryBuilder
             ? whereClause.IndexOf("WHERE", StringComparison.OrdinalIgnoreCase) == -1 ? "WHERE " + whereClause : whereClause
             : string.Empty;
 
-        var orderCondition =  !string.IsNullOrEmpty(orderByClause)
+        var orderCondition = !string.IsNullOrEmpty(orderByClause)
             ? orderByClause.IndexOf("ORDER BY", StringComparison.OrdinalIgnoreCase) == -1 ? "ORDER BY " + orderByClause : orderByClause
             : string.Empty;
-                
+
         return new PagedSqlResult
         {
             CurrentPage = currentPage,

@@ -2,11 +2,11 @@
 
 internal abstract class DbProvider
 {
-    protected internal string ParameterDelimiter { get; }
+    protected internal char ParameterDelimiter { get; }
 
     protected DbProvider() { }
 
-    internal DbProvider(string parameterDelimiter) => ParameterDelimiter = parameterDelimiter;
+    internal DbProvider(char parameterDelimiter) => ParameterDelimiter = parameterDelimiter;
 
     internal abstract TEntity Insert<TEntity>(TEntity entity, Database db) where TEntity : class;
 

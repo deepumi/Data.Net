@@ -4,7 +4,7 @@ namespace Data.Net;
 
 internal sealed class SqlServerQueryBuilder : EntityQueryBuilder
 {
-    public override string ParameterDelimiter => "@";
+    public override char ParameterDelimiter => '@';
 
     public override SqlResult InsertQuery(EntityMetaData metaData)
     {
@@ -31,7 +31,7 @@ internal sealed class SqlServerQueryBuilder : EntityQueryBuilder
 
     private static void CreateColumnNames(StringBuilder sb, EntityMetaData metaData)
     {
-        var comma = string.Empty;
+        var first = true;
 
         sb.Append(" (");
 
@@ -39,10 +39,10 @@ internal sealed class SqlServerQueryBuilder : EntityQueryBuilder
         {
             if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
 
-            sb.Append(comma);
+            sb.Append(first ? "" : ',');
             sb.Append(metaData.PropertiesList[i].Name);
 
-            comma = ",";
+            first = false;
         }
 
         sb.Append(") ");
@@ -52,17 +52,17 @@ internal sealed class SqlServerQueryBuilder : EntityQueryBuilder
     {
         sb.Append(" VALUES (");
 
-        var comma = string.Empty;
+        var first = true;
 
         for (var i = 0; i < metaData.PropertiesList.Count; i++)
         {
             if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name)) continue;
-                
-            sb.Append(comma);
+
+            sb.Append(first ? "" : ',');
             sb.Append(ParameterDelimiter);
             sb.Append(metaData.PropertiesList[i].Name);
 
-            comma = ",";
+            first = false;
         }
 
         sb.Append(") ");

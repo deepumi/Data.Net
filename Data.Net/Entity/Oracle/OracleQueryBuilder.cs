@@ -7,8 +7,9 @@ internal sealed class OracleQueryBuilder : EntityQueryBuilder
 {
     private const string InsertSql = "INSERT INTO {0} ({1}) VALUES({2}) {3}";
 
-    public override string ParameterDelimiter => ":";
-        
+    public override char ParameterDelimiter => ':';
+
+
     public override SqlResult InsertQuery(EntityMetaData metaData)
     {
         var dataParameters = CreateDataParameters(metaData);
@@ -23,25 +24,25 @@ internal sealed class OracleQueryBuilder : EntityQueryBuilder
     {
         var sb = new StringBuilder();
 
-        var comma = string.Empty;
+        var first = true;
 
         for (var i = 0; i < metaData.PropertiesList.Count; i++)
         {
             var columnName = metaData.PropertiesList[i].Name;
-                
+
             if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name))
             {
                 if (string.IsNullOrEmpty(metaData.AutoIncrementInfo.SequenceName)) continue;
             }
 
-            sb.Append(comma);
+            sb.Append(first ? "" : ',');
             sb.Append(columnName);
 
-            comma = ",";
+            first = false;
         }
 
         var columns = sb.ToString();
-            
+
         sb.Clear();
 
         var identityInserted = string.Empty;
@@ -49,27 +50,27 @@ internal sealed class OracleQueryBuilder : EntityQueryBuilder
         if (metaData.AutoIncrementInfo?.AutoIncrementSetter != null)
             identityInserted = string.Concat("RETURNING ", metaData.AutoIncrementInfo.ColumnName, " INTO :", metaData.AutoIncrementInfo.ColumnName);
 
-        comma = string.Empty;    
+        first = true;
 
         for (var i = 0; i < metaData.PropertiesList.Count; i++)
         {
             string paramName;
-                
+
             if (metaData.IsAutoIncrement(metaData.PropertiesList[i].Name))
             {
                 if (metaData.AutoIncrementInfo == null || string.IsNullOrEmpty(metaData.AutoIncrementInfo.SequenceName)) continue;
-                    
+
                 paramName = string.Concat(metaData.AutoIncrementInfo?.SequenceName, ".NEXTVAL");
             }
             else
             {
-                paramName = string.Concat(ParameterDelimiter,metaData.PropertiesList[i].Name);
+                paramName = string.Concat(ParameterDelimiter, metaData.PropertiesList[i].Name);
             }
 
-            sb.Append(comma);
+            sb.Append(first ? "" : ',');
             sb.Append(paramName);
 
-            comma = ",";
+            first = false;
         }
 
         var values = sb.ToString();
