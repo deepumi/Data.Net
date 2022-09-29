@@ -2,100 +2,99 @@
 using System.ComponentModel;
 using System.Data;
 
-namespace Data.Net
+namespace Data.Net;
+
+/// <summary>
+/// 
+/// </summary>
+public static class DataParameterExtensions
 {
     /// <summary>
-    /// 
+    /// Convert <see cref="IDbDataParameter"/> to DataParameters.
     /// </summary>
-    public static class DataParameterExtensions
+    /// <param name="parameters"></param>
+    /// <returns></returns>
+    public static DataParameters ToDbParameters(this IEnumerable<IDbDataParameter> parameters)
     {
-        /// <summary>
-        /// Convert <see cref="IDbDataParameter"/> to DataParameters.
-        /// </summary>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        public static DataParameters ToDbParameters(this IEnumerable<IDbDataParameter> parameters)
+        if (parameters == null) return default;
+
+        return new DataParameters(parameters);
+    }
+
+    internal static DataParameters ToDbParameters(this object parameters, string parameterDelimiter)
+    {
+        DataParameters dataParameters;
+
+        switch (parameters)
         {
-            if (parameters == null) return default;
+            case null:
+                return null;
 
-            return new DataParameters(parameters);
-        }
+            case DataParameters dp:
+                return dp;
 
-        internal static DataParameters ToDbParameters(this object parameters, string parameterDelimiter)
-        {
-            DataParameters dataParameters;
+            case IDictionary<string, object> dict:
 
-            switch (parameters)
-            {
-                case null:
-                    return null;
+                dataParameters = new DataParameters(dict.Count);
 
-                case DataParameters dp:
-                    return dp;
+                foreach (var item in dict)
+                {
+                    dataParameters.Add(AddDelimiter(item.Key, parameterDelimiter), item.Value);
+                }
 
-                case IDictionary<string, object> dict:
+                return dataParameters;
 
-                    dataParameters = new DataParameters(dict.Count);
+            case IEnumerable<KeyValuePair<string, object>> kvp:
 
-                    foreach (var item in dict)
+                if (kvp is IList<KeyValuePair<string, object>> list)
+                {
+                    dataParameters = new DataParameters(list.Count);
+
+                    for (var i = 0; i < list.Count; i++)
                     {
-                        dataParameters.Add(AddDelimiter(item.Key, parameterDelimiter), item.Value);
+                        dataParameters.Add(AddDelimiter(list[i].Key, parameterDelimiter), list[i].Value);
                     }
 
                     return dataParameters;
+                }
 
-                case IEnumerable<KeyValuePair<string, object>> kvp:
+                dataParameters = new DataParameters();
 
-                    if (kvp is IList<KeyValuePair<string, object>> list)
-                    {
-                        dataParameters = new DataParameters(list.Count);
+                foreach (var item in kvp)
+                {
+                    dataParameters.Add(AddDelimiter(item.Key, parameterDelimiter), item.Value);
+                }
 
-                        for (var i = 0; i < list.Count; i++)
-                        {
-                            dataParameters.Add(AddDelimiter(list[i].Key, parameterDelimiter), list[i].Value);
-                        }
+                return dataParameters;
 
-                        return dataParameters;
-                    }
-
-                    dataParameters = new DataParameters();
-
-                    foreach (var item in kvp)
-                    {
-                        dataParameters.Add(AddDelimiter(item.Key, parameterDelimiter), item.Value);
-                    }
-
-                    return dataParameters;
-
-                case IEnumerable<IDbDataParameter> kvp:
+            case IEnumerable<IDbDataParameter> kvp:
  
-                    return new DataParameters(kvp);
+                return new DataParameters(kvp);
 
-                default:
+            default:
 
-                    var properties = TypeDescriptor.GetProperties(parameters);
+                var properties = TypeDescriptor.GetProperties(parameters);
 
-                    dataParameters = new DataParameters(properties.Count);
+                dataParameters = new DataParameters(properties.Count);
 
-                    for (var i = 0; i < properties.Count; i++)
-                    {
-                        var obj = properties[i].GetValue(parameters);
+                for (var i = 0; i < properties.Count; i++)
+                {
+                    var obj = properties[i].GetValue(parameters);
 
-                        dataParameters.Add(AddDelimiter(properties[i].Name, parameterDelimiter), obj);
-                    }
+                    dataParameters.Add(AddDelimiter(properties[i].Name, parameterDelimiter), obj);
+                }
 
-                    return dataParameters;
-            }
+                return dataParameters;
         }
+    }
 
-        private static string AddDelimiter(string key, string parameterDelimiter)
-        {
-            if (key == null) return string.Empty;
+    private static string AddDelimiter(string key, string parameterDelimiter)
+    {
+        if (key == null) return string.Empty;
 
-            return key[0] >= 65 && key[0] <= 90 // A-Z
-                          || key[0] >= 97 && key[0] <= 122 // a-z
-                ? parameterDelimiter + key
-                : key;
-        }
+        return key[0] >= 65 && key[0] <= 90 // A-Z
+               || key[0] >= 97 && key[0] <= 122 // a-z
+            ? parameterDelimiter + key
+            : key;
     }
 }

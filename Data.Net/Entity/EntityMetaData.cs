@@ -2,88 +2,87 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Data.Net
+namespace Data.Net;
+
+internal sealed class EntityMetaData
 {
-    internal sealed class EntityMetaData
+    private const BindingFlags Flags = BindingFlags.Public | BindingFlags.Instance;
+
+    private readonly object _entity;
+
+    internal string TableName { get; }
+
+    internal AutoIncrementInfo AutoIncrementInfo { get; private set; }
+
+    internal List<PropertyPair> PropertiesList { get; private set; }
+
+    internal string KeyInfo { get; private set; }
+
+    internal EntityMetaData(object entity)
     {
-        private const BindingFlags Flags = BindingFlags.Public | BindingFlags.Instance;
+        var type = entity.GetType();
 
-        private readonly object _entity;
+        _entity = entity;
 
-        internal string TableName { get; }
+        var tableInfo = type.GetCustomAttribute<TableNameAttribute>(false);
 
-        internal AutoIncrementInfo AutoIncrementInfo { get; private set; }
+        TableName = string.IsNullOrEmpty(tableInfo?.TableName) ? type.Name : tableInfo.TableName;
 
-        internal List<PropertyPair> PropertiesList { get; private set; }
+        BindProperties(type);
+    }
 
-        internal string KeyInfo { get; private set; }
-
-        internal EntityMetaData(object entity)
-        {
-            var type = entity.GetType();
-
-            _entity = entity;
-
-            var tableInfo = type.GetCustomAttribute<TableNameAttribute>(false);
-
-            TableName = string.IsNullOrEmpty(tableInfo?.TableName) ? type.Name : tableInfo.TableName;
-
-            BindProperties(type);
-        }
-
-        internal bool IsAutoIncrement(string key) => AutoIncrementInfo != null &&
-                                            key.Equals(AutoIncrementInfo.ColumnName,
-                                                StringComparison.OrdinalIgnoreCase);
+    internal bool IsAutoIncrement(string key) => AutoIncrementInfo != null &&
+                                                 key.Equals(AutoIncrementInfo.ColumnName,
+                                                     StringComparison.OrdinalIgnoreCase);
         
-        private void BindProperties(IReflect type)
+    private void BindProperties(IReflect type)
+    {
+        var properties = type.GetProperties(Flags);
+
+        PropertiesList = new List<PropertyPair>(properties.Length);
+
+        for (var i = 0; i < properties.Length; i++)
         {
-            var properties = type.GetProperties(Flags);
+            var columnProperty = properties[i].GetCustomAttribute<ColumnAttribute>(false);
 
-            PropertiesList = new List<PropertyPair>(properties.Length);
+            if (properties[i].GetSetMethod() == null ||
+                columnProperty is { IgnoreColumn: true }) continue;
 
-            for (var i = 0; i < properties.Length; i++)
-            {
-                var columnProperty = properties[i].GetCustomAttribute<ColumnAttribute>(false);
+            var columnName = columnProperty?.Name ?? properties[i].Name;
 
-                if (properties[i].GetSetMethod() == null ||
-                    columnProperty is { IgnoreColumn: true }) continue;
+            PropertiesList.Add(new PropertyPair(columnName, properties[i].GetValue(_entity, null)));
 
-                var columnName = columnProperty?.Name ?? properties[i].Name;
+            if (string.IsNullOrEmpty(KeyInfo) && properties[i].GetCustomAttribute<KeyAttribute>(false) != null)
+                KeyInfo = columnName;
 
-                PropertiesList.Add(new PropertyPair(columnName, properties[i].GetValue(_entity, null)));
+            if (AutoIncrementInfo != null) continue;
 
-                if (string.IsNullOrEmpty(KeyInfo) && properties[i].GetCustomAttribute<KeyAttribute>(false) != null)
-                    KeyInfo = columnName;
+            var autoIncrementInfo = CreateAutoIncrementInfo(properties[i], columnName);
 
-                if (AutoIncrementInfo != null) continue;
+            if (autoIncrementInfo != null) AutoIncrementInfo = autoIncrementInfo;
+        }
+    }
 
-                var autoIncrementInfo = CreateAutoIncrementInfo(properties[i], columnName);
+    private AutoIncrementInfo CreateAutoIncrementInfo(PropertyInfo property, string columnName)
+    {
+        var autoIncrement = property.GetCustomAttribute<AutoIncrementAttribute>(false);
 
-                if (autoIncrementInfo != null) AutoIncrementInfo = autoIncrementInfo;
-            }
+        if (autoIncrement == null) return null;
+
+        Action<object> autoIncrementSetter = default;
+
+        IAutoIncrementRetriever retrieve = default;
+
+        if (_entity is IAutoIncrementRetriever retriever)
+        {
+            retrieve = retriever;
+        }
+        else
+        {
+            autoIncrementSetter = b => property.SetValue(_entity, b);
         }
 
-        private AutoIncrementInfo CreateAutoIncrementInfo(PropertyInfo property, string columnName)
-        {
-            var autoIncrement = property.GetCustomAttribute<AutoIncrementAttribute>(false);
-
-            if (autoIncrement == null) return null;
-
-            Action<object> autoIncrementSetter = default;
-
-            IAutoIncrementRetriever retrieve = default;
-
-            if (_entity is IAutoIncrementRetriever retriever)
-            {
-                retrieve = retriever;
-            }
-            else
-            {
-                autoIncrementSetter = b => property.SetValue(_entity, b);
-            }
-
-            return new AutoIncrementInfo(columnName, autoIncrement.SequenceName, retrieve, autoIncrementSetter,
-                property.PropertyType);
-        }
+        return new AutoIncrementInfo(columnName, autoIncrement.SequenceName, retrieve, autoIncrementSetter,
+            property.PropertyType);
     }
 }

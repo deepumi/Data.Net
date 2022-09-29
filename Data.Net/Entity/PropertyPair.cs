@@ -1,15 +1,14 @@
-﻿namespace Data.Net
+﻿namespace Data.Net;
+
+internal sealed class PropertyPair
 {
-    internal sealed class PropertyPair
+    internal readonly string Name;
+
+    internal readonly object Value;
+
+    internal PropertyPair(string name, object value)
     {
-        internal readonly string Name;
-
-        internal readonly object Value;
-
-        internal PropertyPair(string name, object value)
-        {
-            Name = name;
-            Value = value;
-        }
+        Name = name;
+        Value = value;
     }
 }

@@ -1,14 +1,13 @@
-﻿namespace Data.Net
-{ 
+﻿namespace Data.Net;
+
+/// <summary>
+/// 
+/// </summary>
+public interface IAutoIncrementRetriever
+{
     /// <summary>
     /// 
     /// </summary>
-    public interface IAutoIncrementRetriever
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="autoIncrementValue"></param>
-        void Retrieve(object autoIncrementValue);
-    }
+    /// <param name="autoIncrementValue"></param>
+    void Retrieve(object autoIncrementValue);
 }

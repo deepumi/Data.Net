@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Data.Net
+namespace Data.Net;
+
+/// <summary>
+/// 
+/// </summary>
+public sealed class KeyAttribute : Attribute
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public sealed class KeyAttribute : Attribute
-    {
-    }
 }
